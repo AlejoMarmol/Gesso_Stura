@@ -1,0 +1,6 @@
+dati_stazioni/
+venv/
+experiments.ipynb
+bilancio_idrico.py
+__pycache__/
+.vscode/

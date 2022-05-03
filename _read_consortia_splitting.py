@@ -13,18 +13,20 @@ input_permeability = "C://Users/clemo/Documents/Italie/Studio PD/QGIS/permeabili
 
 
 
-dict_perma = {'dren' : {1 : 'Alta' , 2 : 'Alta',
-                        3 : 'Media',
-                        4 : 'Bassa', 5 : 'Bassa', 6 : 'Bassa', 7 : 'Bassa', 8 : 'Bassa'},
-              'cuso' : {1 : '1-2', 2 : '1-2',
-                        3 : '3',
-                        4 : '4', 5 : '4', 6 : '4', 7 : '4', 8 : '4'}
-              }
+dict_perma_dataset = {'dren' : {1 : 'Alta' , 2 : 'Alta',
+                                3 : 'Media',
+                                4 : 'Bassa', 5 : 'Bassa', 6 : 'Bassa', 7 : 'Bassa', 8 : 'Bassa'},
+                      'cuso' : {1 : '1-2', 2 : '1-2',
+                                3 : '3',
+                                4 : '4', 5 : '4', 6 : '4', 7 : '4', 8 : '4'}
+                      }
               
-dict_matrix = {('Bassa','1-2'): 0 , ('Media','1-2'): 0 , ('Alta','1-2'): 0,
-               ('Bassa','3')  : 0 , ('Media','3')  : 0 , ('Alta','3')  : 0,
-               ('Bassa','4')  : 0 , ('Media','4')  : 0 , ('Alta','4')  : 0
-               }
+# create the matrix of permeability based on a dictionnary
+dict_perma_matrix  = {('Bassa','1-2'): 0 , ('Media','1-2'): 0 , ('Alta','1-2'): 0,
+                      ('Bassa','3')  : 0 , ('Media','3')  : 0 , ('Alta','3')  : 0,
+                      ('Bassa','4')  : 0 , ('Media','4')  : 0 , ('Alta','4')  : 0
+                      }
+    
 # %% =========================================================================
 # dataframe consortium intersect with comuni
 # ============================================================================
@@ -77,42 +79,43 @@ def collect_information_consortium(consortia, list_consor=False):
     # # ------------- covered by each crops inside the consortium -------------
     df_merge['Airr,cons'] = df_merge['Ratio_Superficie_crops']*df_merge['Area da usare']
     
+
+    # test if it is list of consortium or not
+    if list_consor == False :
+        consortia = [consortia]
     
-    if list_consor == True :
-        
-        dict_crops = dict.fromkeys(consortia, 0)
-        dict_matrix = dict.fromkeys(consortia, 0)
-        
-        for consortium in consortia :
-            # for the crops
-            df_consor_crop = df_merge[(df_merge.consor_nome == consortium)]
-            df_sum_crop = df_consor_crop.groupby(by = ['crops']).sum()
-            dict_crops[consortium] = df_sum_crop['Airr,cons'].to_dict()
-            
-            # for the permeability
-            df_consor_perm = df_permability[(df_permability.consor_nome == consortium)]
-            df_sum_perm = df_consor_perm.groupby(by=['dren','cuso']).sum()
-            # round the value to 2 decimal 
-            df_sum_perm['inter_perma_area_%'] = df_sum_perm['inter_perma_area_%'].round(decimals = 2)
-            dict_matrix[consortium] = df_sum_perm['inter_perma_area_%'].to_dict()           
     
-    else : 
+    "create the output for the crops based on a dict, where key = consortium"
+    dict_crops = dict.fromkeys(consortia, 0)
+    "create the output for the permeability matrix based on a dict, where key = consortium"
+    dict_consor_matrix = dict.fromkeys(consortia, 0)
+    
+    for consortium in consortia :
+        # initalize the matrix of permeability to 0 value only "
+        dict_matrix  = dict(dict_perma_matrix)
         
-        df_sum_crop = df_merge.groupby(by = ['crops']).sum()
+        # for the crops
+        df_consor_crop = df_merge[(df_merge.consor_nome == consortium)]
+        df_sum_crop = df_consor_crop.groupby(by = ['crops']).sum()
+        dict_crops[consortium] = df_sum_crop['Airr,cons'].to_dict()
         
-        # create a dict where the keys are the consortium and the type of crops
-        dict_crops = df_sum_crop['Airr,cons'].to_dict()
-        
-        
-        df_sum_perm = df_permability.groupby(by=['dren','cuso']).sum()
+        # for the permeability
+        df_consor_perm = df_permability[(df_permability.consor_nome == consortium)]
+        df_sum_perm = df_consor_perm.groupby(by=['dren','cuso']).sum()
         # round the value to 2 decimal 
         df_sum_perm['inter_perma_area_%'] = df_sum_perm['inter_perma_area_%'].round(decimals = 2)
+        dict_consor_perm = df_sum_perm['inter_perma_area_%'].to_dict() 
+  
+        # full the dictionnary perma which correspond to the matrix of permeability
+        for key in dict_matrix.keys():
+            if key in df_sum_perm['inter_perma_area_%'].index:
+                dict_matrix[key] = dict_consor_perm[key]
         
-        # create a dict where the keys are the consortium, the type of dren and capacity
-        dict_matrix = df_sum_perm['inter_perma_area_%'].to_dict()
+        # add the dict perma inside the dict contains all the matrix of each consortium
+        dict_consor_matrix[consortium] = dict_matrix
     
     
-    return(df_merge,dict_crops, dict_matrix)
+    return(dict_crops, dict_consor_matrix)
     
     
     
@@ -319,8 +322,8 @@ def collect_data_permeability(consortia, list_consor = False):
                                                       'fk_cuso','fk_dren'])
     # use the dict_perm to associate each value of dren and cuso with the one 
     # in the matrix of quant 4
-    df_permeability['dren'] = df_permeability['fk_dren'].map(dict_perma['dren'])
-    df_permeability['cuso'] = df_permeability['fk_dren'].map(dict_perma['cuso'])
+    df_permeability['dren'] = df_permeability['fk_dren'].map(dict_perma_dataset['dren'])
+    df_permeability['cuso'] = df_permeability['fk_dren'].map(dict_perma_dataset['cuso'])
                    
     # # --------------------- Calculate the percentage ------------------------
     # # --------- cover by each intersection dren_capcity_consortium ----------

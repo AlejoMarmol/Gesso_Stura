@@ -5,5 +5,8 @@ bilancio_idrico.py
 __pycache__/
 .vscode/
 Prove.ipynb
-Bilancio/Bilancio.xlsx
+Bilancio/
+ProveQGIS/
+Prove.py
+
 

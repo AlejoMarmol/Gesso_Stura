@@ -7,12 +7,16 @@ Created on Wed Apr 27 10:34:31 2022
 
 import pandas as pd
 
+# cvs file
 input_consortium = "C://Users/clemo/Documents/Italie/Studio PD/QGIS/consortia/consorzi/consorzi_split_by_comuni.csv"
 input_municipality = "C://Users/clemo/Documents/Italie/Studio PD/QGIS/Agriculture-info/sasExportX14X.csv"
 input_permeability = "C://Users/clemo/Documents/Italie/Studio PD/QGIS/permeability/capacita_uso_suoli_con_drenaggio_con_consorzi.csv"
 
+# ratio of urbanization and canali inside qgis
+Perc_urbanizzazione = 2.0
+Perc_stradi_canali_ecc = 3.0
 
-
+# dict for calculating the matrix
 dict_perma_dataset = {'dren' : {1 : 'Alta' , 2 : 'Alta',
                                 3 : 'Media',
                                 4 : 'Bassa', 5 : 'Bassa', 6 : 'Bassa', 7 : 'Bassa', 8 : 'Bassa'},
@@ -30,77 +34,136 @@ dict_perma_matrix  = {('Bassa','1-2'): 0 , ('Media','1-2'): 0 , ('Alta','1-2'): 
 # %% =========================================================================
 # dataframe consortium intersect with comuni
 # ============================================================================
-            
 
-
-def collect_information_consortium(consortia, list_consor=False):
+def collect_all_information():
+    """
+    Collect all the information for the crops and for the permeability matrix for 
+    all the consortium
+    ----------------------
+    Returns :
+    ----------------------
+    dict_S_tot_crops : dictionnay
+        key_1 = consortitum name 
+        key_2 = type of crop
+        value  = superficie of the crop
+        
+    dict_matrix_value : dictonnary
+        key_1 = consortitum name
+        key_2 = (type of dren, type of capacity) 
+        value  = ratio inside the consortium
+        
+    dict_superficy : dictonnary
+        key_1 = consortitum name
+        key_2 = municipalities related to the consortium 
+        value =  superficie of the consortium inside the city 
+    -------
+    """
+    consortia = []
+    return(collect_information_consortium(consortia, True))
+    
+    
+def collect_information_consortium(consortia, all_info=False):
     """
     Collect the information concerning all the municpalities related to 
     the consortium. The information are : the crops, the surface area covered
     by the crops, area of the city and the name of the city
         
-    Parameters: 
+    Parameters local: 
     ----------------------
-    consortium : string
-        name of the consortium
+    consortia : list
+        liste with the name of the consortium
         
-    list_consor : Booléen
-        tell if consortium is a list or not 
+    Parameters global : 
+    ----------------------
+    dict_perma_matrix : dictionnary
+        dict whcih represents the matrix of permeability where all the coef are 
+        set to 0
         
     ----------------------
     Returns :
     ----------------------
     dict_S_tot_crops : dictionnay
-        key = (consortitum name, crop) 
+        key_1 = consortitum name 
+        key_2 = type of crop
         value  = superficie of the crop
         
     dict_matrix_value : dictonnary
-        key = (consortitum name, type of dren, type of capacity) 
+        key_1 = consortitum name
+        key_2 = (type of dren, type of capacity) 
         value  = ratio inside the consortium
+
+    dict_superficy : dictonnary
+        key_1 = consortitum name
+        key_2 = municipalities related to the consortium 
+        value =  superficie of the consortium inside the city 
     -------
     """
-    # # ------------------------- Collect the data ----------------------------    
+    #test if it is list of consortium or not
+    if not all_info  : 
+        if type(consortia) is not list :
+            consortia = [consortia]
+        print(consortia)
+    
+        
+    # # -------------------- Collect the data for crops------------------------   
     # Collect the data related to the intersection consortium - comuni
-    df_consor_n_comuni = intersection_consortium_comuni(consortia, list_consor)
+    df_consor_n_comuni = intersection_consortium_comuni(consortia, all_info)
     
     list_comuni = df_consor_n_comuni.comune_nome.tolist()
-    
+       
     # extract the information concerning municipalities related to the consortium
     df_comuni = collect_data_crops_comuni(list_comuni)
-    
-    # # ---------------- Collect the data of permeability ---------------------
-    df_permability = collect_data_permeability(consortia, list_consor)
- 
-    # # ------------------------------ Merge ----------------------------------
+
+    # Merge 
     df_merge = pd.merge(df_consor_n_comuni, df_comuni, on = 'comune_nome')
 
-
-    # # ------------------------- Calculate the surface  ----------------------
-    # # ------------- covered by each crops inside the consortium -------------
+    # Calculate the surface covered by each crops inside the consortium 
     df_merge['Airr,cons'] = df_merge['Ratio_Superficie_crops']*df_merge['Area da usare']
     
-
-    # test if it is list of consortium or not
-    if list_consor == False :
-        consortia = [consortia]
+    # # ---------------- Collect the data of permeability ---------------------
+    df_permeability = collect_data_permeability(consortia, all_info)
+       
     
-    
-    "create the output for the crops based on a dict, where key = consortium"
+    # # --------- Creation of the dict which contains the results -------------
+    if all_info : 
+        consortia  =  df_permeability.consor_nome.tolist()
+        
+    # ------------------------------
+    """create the output for the crops based on a dict, 
+    where key = consortium, sub_key =  type of crop"""
     dict_crops = dict.fromkeys(consortia, 0)
-    "create the output for the permeability matrix based on a dict, where key = consortium"
+    # ------------------------------
+    """create the output for the permeability matrix based on a dict, 
+    where key = consortium, sub_key = place in the matric"""
     dict_consor_matrix = dict.fromkeys(consortia, 0)
+    # ------------------------------
+    """create the output for the superficy based on a dict,
+    key = consortium, sub_key = municipaliti"""
+    dict_superficy = dict.fromkeys(consortia, 0)
+    # ------------------------------
     
     for consortium in consortia :
         # initalize the matrix of permeability to 0 value only "
         dict_matrix  = dict(dict_perma_matrix)
         
-        # for the crops
+        # ------------------------------
+        # #for the crops and superficy
         df_consor_crop = df_merge[(df_merge.consor_nome == consortium)]
+        
+        # for the superficy
+        df_comune = df_consor_crop.groupby(by = ['comune_nome']).mean()
+        dict_superficy[consortium] = df_comune['Area da usare'].to_dict()
+        # add indication 
+        name = 'Superficie_irrigabile_netta'
+        dict_superficy[consortium] =  dict(("{}_{}".format(name,k),v) for k,v in dict_superficy[consortium].items())
+        
+        # for the crops
         df_sum_crop = df_consor_crop.groupby(by = ['crops']).sum()
         dict_crops[consortium] = df_sum_crop['Airr,cons'].to_dict()
         
+        # ------------------------------
         # for the permeability
-        df_consor_perm = df_permability[(df_permability.consor_nome == consortium)]
+        df_consor_perm = df_permeability[(df_permeability.consor_nome == consortium)]
         df_sum_perm = df_consor_perm.groupby(by=['dren','cuso']).sum()
         # round the value to 2 decimal 
         df_sum_perm['inter_perma_area_%'] = df_sum_perm['inter_perma_area_%'].round(decimals = 2)
@@ -113,27 +176,31 @@ def collect_information_consortium(consortia, list_consor=False):
         
         # add the dict perma inside the dict contains all the matrix of each consortium
         dict_consor_matrix[consortium] = dict_matrix
+        
     
     
-    return(dict_crops, dict_consor_matrix)
+    return(dict_crops, dict_consor_matrix, dict_superficy)
     
     
     
          
-def intersection_consortium_comuni(consortia,list_consor = False, Perc_urbanizzazione = 2.0, Perc_stradi_canali_ecc = 3.0):
+def intersection_consortium_comuni(consortia, all_info=False):
     """
     find  all the municipalities related to the consortium and check if the 
     columns from the intersection between comuni and consortium have the right 
     name
         
-    Parameters: 
+    Parameters local : 
     ----------------------
-    consortium : string
-        name of the consortium
+    consortia : list
+        liste with the name of the consortium
         
-    list_consor : Booléen
-        tell if consortium is a list or not 
+    all_info : booléen
+        booléen which contains the information, do we want to extract the 
+        information for all consortia
         
+    Parameters global : 
+    ----------------------
     Perc_urbanizzazione : float
         percentage of urbanization didn't take into account in the .shp file of
         the consortium
@@ -144,7 +211,7 @@ def intersection_consortium_comuni(consortia,list_consor = False, Perc_urbanizza
 
     Returns
     -------
-    dataframe : 
+    df_consor_n_comuni : dataframe  
         contains the aggregato, the consortium are, the name of 
         comuni where the consortium, the area of the comune and the area of the 
         consortium inside each comune
@@ -164,9 +231,7 @@ def intersection_consortium_comuni(consortia,list_consor = False, Perc_urbanizza
                       'comune_nome','comune_area','intersect_area' ''')
             
     # Select the consortium we want 
-    if list_consor == False :
-        df_consor_n_comuni = df_consor_n_comuni[(df_consor_n_comuni.consor_nome == consortia)]
-    else :
+    if all_info == False : 
         df_consor_n_comuni = df_consor_n_comuni[df_consor_n_comuni['consor_nome'].isin(consortia)]
     
     
@@ -186,12 +251,10 @@ def intersection_consortium_comuni(consortia,list_consor = False, Perc_urbanizza
     
     # Calculate the use area of the consortium inside the comune
     # due to urbanization road, etc which aren't take into account into QGIS
-    Perc_urban = Perc_urbanizzazione #"%" 
-    Perc_stradi = Perc_stradi_canali_ecc #"%"
     
-    df_consor_n_comuni['Superficie aree urbanizzate -comune'] = df_consor_n_comuni['intersect_area']*Perc_urban
+    df_consor_n_comuni['Superficie aree urbanizzate -comune'] = df_consor_n_comuni['intersect_area']*Perc_urbanizzazione/100
     df_consor_n_comuni['Superficie irrigabile lorda - comune [ha]'] = df_consor_n_comuni['intersect_area'] - df_consor_n_comuni['Superficie aree urbanizzate -comune']
-    df_consor_n_comuni['Area da usare'] = (1-Perc_stradi)* df_consor_n_comuni['Superficie irrigabile lorda - comune [ha]']
+    df_consor_n_comuni['Area da usare'] = (1-Perc_stradi_canali_ecc/100)* df_consor_n_comuni['Superficie irrigabile lorda - comune [ha]']
 
 
     return(df_consor_n_comuni)
@@ -199,7 +262,7 @@ def intersection_consortium_comuni(consortia,list_consor = False, Perc_urbanizza
     
     
     
-def collect_data_crops_comuni(list_comuni):
+def collect_data_crops_comuni(list_comuni, all_info=False):
     """
     read the database which contains all the information concerning the 
     crops inside each comuni related to a list of comuni
@@ -208,10 +271,14 @@ def collect_data_crops_comuni(list_comuni):
     ----------------------
     list_comuni : list of string
         contains all the comuni for which we want the information
+        
+    all_info : booléen
+        booléen which contains the information, do we want to extract the 
+        information for all consortia
 
     Returns
     -------
-    dataframe : 
+    df_comuni : dataframe 
         columns : municpalities - livello - Aziende con terreni - 
                   superficie total covered by each livello - anno - 
                   ratio surface : Surface_one_livello/Surace_municipality
@@ -234,8 +301,9 @@ def collect_data_crops_comuni(list_comuni):
     df_comuni.reset_index()
     
     # select only the municipalities we want
-    df_comuni = df_comuni[df_comuni['comune_nome'].isin(list_comuni)]
-
+    if all_info == False :
+        df_comuni = df_comuni[df_comuni['comune_nome'].isin(list_comuni)]
+        
 
     # # ------------------------- Correct the data ----------------------------
     # transform str into float for the aziende and the superficie
@@ -273,21 +341,29 @@ def collect_data_crops_comuni(list_comuni):
 
 
 
-def collect_data_permeability(consortia, list_consor = False):
+def collect_data_permeability(consortia, all_info=False):
     """
     collect the database containing the permeability and the type of soil for 
     each consortium
         
-    Parameters: 
+    Parameters local : 
     ----------------------
-    consortium : string
-        name of the consortium
-    list_consor : Booléen
-        tell if consortium is a list or not 
+    consortia : list
+        liste with the name of the consortium
+        
+    all_info : booléen
+        booléen which contains the information, do we want to extract the 
+        information for all consortia
+
+    Parameters global : 
+    ----------------------
+    dict_perma_matrix : dict
+        contains the link between the value of permeability and type of soil 
+        with the value related to the matrix of permeability
 
     Returns
     -------
-    dataframe : 
+    df_permeability : dataframe  
         contains all the data concerning the intersection between the consortium
         the permeability and the quality of soil
     """
@@ -307,9 +383,7 @@ def collect_data_permeability(consortia, list_consor = False):
                       'inter_perma_area','fk_cuso','fk_dren' ''')
             
     # Select the consortium we want 
-    if list_consor == False :
-        df_permeability = df_permeability[(df_permeability.consor_nome == consortia)]
-    else :
+    if all_info == False :
         df_permeability = df_permeability[df_permeability['consor_nome'].isin(consortia)]
     
     # arrange the columns
@@ -328,7 +402,7 @@ def collect_data_permeability(consortia, list_consor = False):
     # # --------------------- Calculate the percentage ------------------------
     # # --------- cover by each intersection dren_capcity_consortium ----------
     ratio  = df_permeability['inter_perma_area']/df_permeability['consor_area']
-    df_permeability['inter_perma_area_%'] = round(ratio*100,2)
+    df_permeability['inter_perma_area_%'] = round(ratio*100,3)
     
     
     return(df_permeability)

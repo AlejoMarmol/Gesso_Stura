@@ -30,10 +30,12 @@ df_verme['River'] = river_verme
 df_section_rivers = pd.concat([df_gesso, df_verme])
 
 # %%
-
-# # -------------------------- class river ----------------------------------  
+# =============================================================================
+# ---------------------------------- RIVER ------------------------------------
+# ============================================================================= 
 class River():
-    def __init__(self,river, df_river):
+    # -------------------------------------------------------------------------
+    def __init__(self,river, df_river, df_node):
         """
         init : 
             name of the river
@@ -43,6 +45,7 @@ class River():
         self.name = river
         self.list_section = []
         self.list_node_number = []
+        self.list_node = []
         
         # create the section of the river
         for section_name in df_river['Tratto'].unique():
@@ -50,23 +53,40 @@ class River():
                               df_river[df_river.Tratto == section_name])
                 
             self.list_section.append(section)
-            # add the starting node of the section inside the list of node owned by the river
-            self.list_node_number.append(section.starting_number)
+            # create the node of the section
+            section.create_starting_node(df_node)
+            section.create_ending_node(df_node)
+            
+            # add the node in the list of node of the river
+            self.list_node.append(section.starting_node)
+            self.list_node_number.append(section.starting_node.number)
         
-        self.list_node_number.append(section.ending_number)
+        # add the last node which the ending node of the last section
+        self.list_node.append(section.ending_node)
+        self.list_node_number.append(section.ending_node.number)
+
         
+    # -------------------------------------------------------------------------
+    def create_copy(self):
+        return copy.copy(self)
+    
+    # -------------------------------------------------------------------------      
     def set_river_name(self, new_name):
         self.name = new_name
         
+    # -------------------------------------------------------------------------    
     def set_section_list(self, list_section):
         self.list_section = list_section
-    
+        
+    # -------------------------------------------------------------------------    
+    def set_node_list(self, list_node):
+        self.list_node = list_node
+        
+    # -------------------------------------------------------------------------
     def set_node_number_list(self, list_node_number):
         self.list_node_number = list_node_number
-        
-    def create_copy(self):
-        return copy.copy(self)
-
+                    
+    # -------------------------------------------------------------------------
     def split_river(self,node_number):
         """
         split a river into based on a node, meaning there is a confluence
@@ -87,39 +107,50 @@ class River():
         else : 
             index_split = self.list_node_number.index(node_number)
             
-            # create the downstream river
+            # ------------------ create the downstream river ------------------
             River_av = self.create_copy()
+            # set the river name
             River_av.set_river_name(self.name + '_av')
+            # set the section list
             River_av.set_section_list(self.list_section[index_split:])
+            # set the node list
+            River_av.set_node_list(self.list_node[index_split:])
+            # set the node number list
             River_av.set_node_number_list(self.list_node_number[index_split:])
             
-            # create the upstream river
+            # ------------------ create the upstream river --------------------
             self.set_river_name(self.name + '_am')
+            # set the section list
             self.set_section_list(self.list_section[:index_split])
+            # set the node list
+            self.set_node_list(self.list_node[:index_split] + [self.list_node[index_split]])
+            # set the node number list 
             list_node_number = self.list_node_number[:index_split]+ [self.list_node_number[index_split]]
             self.set_node_number_list(list_node_number)
             
             return [self, River_av]
-    
-    def create_Node(self, df_node):
-        """
-        Create the Node class associated to the river
         
-        Parameters
-        -------------
-        df_node : dataframe
-            
+    # ------------------------------------------------------------------------- 
+    def get_all_presa(self,df_node):
         """
-        self.list_Node = []
+        Calculate all the flow need for the presa inside 
+        """
+         
+        self.flow_presa = 0
+        for node in self.list_Node:
+            presa = node.get_tipo_value('Presa')
+            print(node.number)
+            self.flow_presa += presa
+        
+        return self.flow_presa
     
-        for node_name in df_node['Nodo_num'].unique():
-            node = Node(node_name,
-                        df_node[df_node['Nodo_num'].astype(int) == node_name])
-            self.list_Node.append(node)  
-                
-
-# # -------------------------- class section ----------------------------------       
+            
+# %%
+# =============================================================================
+# --------------------------------- SECTION -----------------------------------
+# =============================================================================
 class Section():
+    # -------------------------------------------------------------------------
     def __init__(self, river,  df_river, flow=None):
         self.river = river
         self.tratto = df_river['Tratto'].values[0]
@@ -129,12 +160,13 @@ class Section():
         else : 
             self.flow = flow
         
-        " nodes related to the section, the information is contained in the "
-        "tratto : 0-1 means starting node = 0 , and ending node = 1"
+        # nodes related to the section, the information is contained in the "
+        # tratto : 0-1 means starting node = 0 , and ending node = 1"
         list_node = self.tratto.split('-')
         self.starting_number = int(list_node[0])
         self.ending_number = int(list_node[1])
-                
+        
+    # -------------------------------------------------------------------------            
     def create_starting_node(self, df_node):
         """
         Create the Node class associated to the starting node of the section
@@ -144,10 +176,10 @@ class Section():
         df_node : dataframe
             
         """
-        self.starting_Node = Node(self.starting_number,
+        self.starting_node = Node(self.starting_number,
                                 df_node[df_node['Nodo_num'].astype(int) == self.starting_number])
 
-                    
+    # -------------------------------------------------------------------------                
     def create_ending_node(self, df_node):
         """
         Create the Node class associated to the ending node of the section
@@ -157,29 +189,35 @@ class Section():
         df_node : dataframe
             
         """
-        self.ending_Node = Node(self.ending_number,
+        self.ending_node = Node(self.ending_number,
                                 df_node[df_node['Nodo_num'].astype(int) == self.ending_number])
+        
 
-                    
+    # -------------------------------------------------------------------------                
     def calculate_section_flow(self):
         """
         calculate the section flow based on the flow leaving of the starting node
         In the mean time set the flow coming at the ending_node
         """
-        if self.starting_Node.subNode  :
-            self.flow_section = self.starting_Node.subNode[-1].calculate_flow_out()
-        else:
-            self.flow_section = self.starting_Node.calculate_flow_out()
+#        if self.starting_Node.subNode  :
+#            self.flow_section = self.starting_Node.subNode[-1].calculate_section_out()
+#        else:
+        self.flow_section = self.starting_node.calculate_section_out()
         
-        if self.ending_Node.subNode  :
-            self.ending_Node.subNode[0].set_flow_in(self.flow_section)
-        else :
-            self.ending_Node.set_flow_in(self.flow_section)
+#        if self.ending_Node.subNode  :
+#            self.ending_Node.subNode[0].add_flow_section(self.flow_section)
+#        else :
+        self.ending_node.add_flow_section(self.flow_section)
         
         return self.flow_section
-            
-# # --------------------------- class Node ------------------------------------
+    
+ 
+# %%           
+# =============================================================================
+# ----------------------------------- NODE ------------------------------------
+# =============================================================================
 class Node():
+    # -------------------------------------------------------------------------
     def __init__(self, number,df_node, confluence=False):
         """
         number : float
@@ -189,15 +227,20 @@ class Node():
                 columns : 'Nome', 'Q', 'Tipo','Etichetta'
         """
         self.confluence = confluence
-        self.number = number 
+        self.number = number
+        self.list_flow_name = df_node['Nome'].unique().tolist()
+        self.list_flow_tipo = df_node['Tipo'].unique().tolist()
         self.list_flow = []
         
-        for flow_name in df_node['Nome'].unique():
-            self.list_flow.append(Flow(flow_name,
-                                       self.number,
-                                       df_node[df_node.Nome == flow_name]))
-            
-        self.flow_in = 0
+        for flow_name in self.list_flow_name :
+            flow = Flow(flow_name,
+                        self.number,
+                        df_node[df_node.Nome == flow_name])
+
+            self.list_flow.append(flow)
+        
+        # set the input flow based on the value of the input flow, whithout the section flow
+        self.flow_in = self.get_tipo_value('Input') + self.get_tipo_value('Restitution')
         
         # check the existance of subnodes:, like node number is 1 but it exist node 1.1 and 1.2 in reality
         self.subNode = []
@@ -209,51 +252,194 @@ class Node():
                                self.confluence)
                 self.subNode.append(subnode)
             
-
+    # -------------------------------------------------------------------------   
     def set_confluence(self, confluence):
         self.confluence = confluence
-    
-    def set_flow_in(self, flow_in):
-        self.flow_in = flow_in
-
-    def calculate_flow_in(self):
-        """
-        Sum all the flow arriving to the node
-        """
-        self.flow_in = 0
-        self.list_flow_in = []
         
-        for flow in self.list_flow :
-            flow.set_sign()
+    # -------------------------------------------------------------------------    
+    def get_tipo_value(self, flow_tipo):
+        """
+        get the value of a specific flow belonging at the node
+        if it doesn't exist for the node, return an error
+        
+        Parameter
+        --------------
+        flow_name : string
+            name of the flow from which we want it value
             
-            if flow.sign > 0 :
-                self.flow_in += flow.value
-                self.list_flow_in.append(flow)
-                
-        return self.flow_in
-    
-    def calculate_flow_out(self):
+        Return
+        --------------
+        flow.value : float
+             value of the flow_name
         """
-        Sum all the flow leaving the node
+        flow_value = 0 # the 0 value all to get a value even if the flow  doesn't exist
+        for flow in self.list_flow : # have to look all the list in case the tipo exist twice or more
+
+            if flow.tipo == flow_tipo:
+                flow_value = flow_value + flow.value
+                
+        return(flow_value)
+        
+    # -------------------------------------------------------------------------
+    def set_tipo_value(self, flow_tipo, flow_value):
         """
-        self.flow_out = 0
-        self.list_flow_out = []
+        set the value of a specific tipo belonging to the node
+        if it doesn't exist for the node, return an error
         
-        for flow in self.list_flow :
-            flow.set_sign()
-            print(flow.name)
-            if flow.sign > 0 and flow.tipo != 'Res' : 
-                self.flow_out += flow.value
-                self.list_flow_out.append(flow)
-                
-        return self.flow_out
-                
-    def calculate_flow_res(self):
+        Nota : If there is at least two flow with the same tipo, 
+        use set_flow_name_value
         
-        return
+        Parameter
+        --------------
+        flow_tipo : string
+            name of the flow's tipo from which we want it value
+        
+        flow_value : float
+            value of the flow
+            
+        Return
+        --------------
+        """
+        if flow_tipo in self.list_flow_tipo :
+            index_flow = self.list_flow_tipo.index(flow_tipo)
+            flow =  self.list_flow[index_flow]
+            flow.value = flow_value
+                
+        else :
+            print(' Attention the flow : ' + flow_tipo +  ', does not exist for the node : '+ str(self.number))
+            return 
     
-# # --------------------------- class Flow ------------------------------------        
+    # -------------------------------------------------------------------------
+    def set_flow_name_value(self, flow_name, flow_value):
+        """
+        set the value of a specific flow name belonging to the node
+        if it doesn't exist for the node, return an error
+        
+        Parameter
+        --------------
+        flow_name : string
+            name of the flow from which we want it value
+            
+        flow.value : float
+             value of the flow_name
+        """
+        if flow_name in self.list_flow_name :
+            index_flow = self.list_flow_name.index(flow_name)
+            flow =  self.list_flow[index_flow]
+            flow.value = flow_value
+                
+        else :
+            print(' Attention the flow : ' + flow_name +  ', does not exist for the node : '+ str(self.number))
+            return
+    # -------------------------------------------------------------------------
+    def add_flow_section(self, flow_in):
+        """
+        the flow coming to a node is the flow of the section + the flow of all inputs
+        """
+        self.flow_in = flow_in + self.flow_in
+        
+    # -------------------------------------------------------------------------    
+    def set_flow_disp(self):
+        """
+        set the value of the available flow inside the river
+        
+        Return
+        ---------
+        flow_disp : float
+            Value of the available flow
+        """
+        # get the value of DMW
+        flow_DMV  = self.get_tipo_value('DMV')
+        
+        # calculate the flow available
+        flow_Disp = self.flow_in - flow_DMV
+        
+        # set the true value, if flow_Disp <0, then flow_Disp == 0
+        if flow_Disp > 0 : 
+            self.set_tipo_value('Disp', flow_Disp)
+            return flow_Disp
+        else :
+            self.set_tipo_value('Disp', 0)
+            return 0
+            
+    # -------------------------------------------------------------------------        
+    def set_flow_res(self, flow_presa):
+        """
+        set the value of the restitution flow
+        """
+        # get the value of the output flow due to inflitrazion
+        # ... in coming
+        # 
+        if 'Res' in self.list_flow_tipo : 
+            flow_disp = self.set_flow_disp() 
+            flow_res = flow_disp - flow_presa
+        
+            # set the value of res
+            self.set_tipo_value( 'Res', flow_res)
+        
+            return flow_res
+        
+        else:
+            return('the flow : Res, does not exist for the node'+ self.number)
+            
+    # ------------------------------------------------------------------------- 
+    def set_flow_output(self):
+        """
+        set the value of an output
+        """
+        self.flow_output_presa = 0
+        if 'Output' in self.list_flow_tipo : 
+            self.flow_output_presa = self.get_tipo_value('Presa')
+        return self.flow_output_presa
+            
+   
+    # -------------------------------------------------------------------------
+    def calculate_section_out(self):
+        """
+        get the flow which is realized into the river after the node
+        """
+        # calculate the flow going into the river
+        self.flow_out = self.get_tipo_value('Presa') + self.get_tipo_value('Inflitration')
+        
+                
+        # calculate the flow available  
+        flow_Disp = self.set_flow_disp()
+        print(flow_Disp)
+        # set the value
+        section_out = flow_Disp - self.flow_out
+        if section_out > 0 :
+            return section_out
+        else :
+            
+            return 0
+# ----------------------------------------------------------------------------         
+#            " Maybe useful function"
+#    def calculate_flow_in(self):
+#        """
+#        Sum all the flow arriving to the node
+#        """
+#        self.flow_in = 0
+#        self.list_flow_in = []
+#        
+#        # if the available flow exist, set it value :
+#        self.set_flow_disp()
+#        
+#        # calculate the flow in 
+#        for flow in self.list_flow :
+#            flow.set_sign()
+#            if flow.sign > 0 :
+#                self.flow_in += flow.value
+#                self.list_flow_in.append(flow)
+#                
+#        return self.flow_in
+# -----------------------------------------------------------------------------   
+
+# %%  
+# =============================================================================
+# ----------------------------------- FLOW ------------------------------------
+# =============================================================================       
 class Flow():   
+    # -------------------------------------------------------------------------
     def __init__(self, name, number, df_node):
         self.name = name
         self.node_parents = number
@@ -262,9 +448,9 @@ class Flow():
         self.sign = 1
 
         return
-   
+    # -------------------------------------------------------------------------
     def set_sign(self):
-       if self.tipo in ['DMV','Inflitrazione', 'Presa']:
+       if self.tipo in ['Inflitrazione', 'Presa','Res']:
            self.sign = -1
             
        return 
@@ -305,7 +491,7 @@ def find_confluence(df_section_rivers):
     return node_confluence
 
 
-def create_river(df_section_rivers):
+def create_river(df_section_rivers, df_node):
     """
     create all the river related to df_section_rivers
     take into account the confluence
@@ -339,14 +525,15 @@ def create_river(df_section_rivers):
         
         # create the river
         river = River(river_name, 
-                      df_section_rivers[df_section_rivers['River'] == river_name])
+                      df_section_rivers[df_section_rivers['River'] == river_name],
+                      df_node)
         
         # check if there isn't a confluence in this river
-        for node in node_confluence:
-             if node in river.list_node_number[1:-2] : 
+        for confluence_number in node_confluence:
+             if confluence_number in river.list_node_number[1:-2] : 
                  # suppress the starting and the ending node, 
                  # because at those place there is no confluence
-                 [river_am, river] = river.split_river(node)
+                 [river_am, river] = river.split_river(confluence_number)
                  list_river.append(river_am)
                  
         list_river.append(river)
@@ -365,16 +552,18 @@ if __name__ == '__main__':
     
     #---------------------
     # test the node classs
+    print(' Test Node class')
     number = 1.1    
     df_node_0 = df_node[df_node.Nodo_num == number]
     
     node_0_1 = Node(number, df_node_0)
-    flow_in = node_0_1.calculate_flow_in()
-    
+    node_0_1.get_tipo_value('DMV')
     
     
     #---------------------
     # Test the section class
+    print('***********')
+    print(' Test Section class')
     river_gesso = 'gesso'
     section = '0-1'
     section_0_1 = Section(river_gesso, df_gesso[df_gesso.Tratto == section])
@@ -385,17 +574,20 @@ if __name__ == '__main__':
     section_0_1.calculate_section_flow()
     #---------------------
     # Test the river class
+#    print('***********')
+#    print(' Test Section class')
+#    
 #    df_river =  df_gesso
-#    river_g = River(river_gesso, df_gesso)
+#    river_g = River(river_gesso, df_gesso, df_node)
+    
     
     #---------------------
     # # ------------------------- test the function ---------------------------
-#    confluence = find_confluence(df_section_rivers)
-#    node_list = create_all_node(df_node,df_section_rivers)
-#    list_rivers = create_river(df_section_rivers)
-#    
-#    gesso_am = list_rivers[0]
-#    section_0_1 = gesso_am.list_section[0]
+    confluence = find_confluence(df_section_rivers)
+    list_rivers = create_river(df_section_rivers, df_node)
+    
+    gesso_am = list_rivers[0]
+    section_0_1 = gesso_am.list_section[0]
 #
 #    gesso_am.create_Node(df_node)
 #    node_list = gesso_am.list_Node

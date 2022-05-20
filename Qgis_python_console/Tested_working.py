@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 
+
 #Input values from rivers and other sources
 
 #Q_gesso=float(input('Introduca Q gesso: '))
@@ -8,16 +9,19 @@ import numpy as np
 #Q_ENEL_45gg=float(input('Introduca Q ENEL 45gg: '))
 #Q_vermenagna=float(input('Introduca Q vermenagna: '))
 
-Q_gesso=3.0
-Q_ENEL_ord=2.0
-Q_ENEL_45gg=3.0
-Q_vermenagna=3.0
-Q_lim_conc = 6.0
+Q_gesso=2.800
+Q_ENEL_ord=2.000
+Q_ENEL_45gg=0.000
+Q_vermenagna=2.100
+Q_lim_conc = 6.000
+
+Q_BM_Stura = 2.50
+Q_NV_a_sx = 0.40
 
 Q_res_m_nodo_1 = Q_gesso + Q_ENEL_ord
 
 Q_eden = 0.0
-Q_dep = 0.0
+Q_dep = 0.5
 
 #Input values from infiltration
 # Q_inf_gesso=float(input('Introduca Q inf gesso prima conf: '))
@@ -27,8 +31,8 @@ Q_inf_m_conf = 0.0
 #????
 
 #Input values from DMV
-DMV_gesso_Italgen = 1 * 1.625
-DMV_gesso_conf = 1 * 1.625
+DMV_gesso_Italgen = (1) * 1.625
+DMV_gesso_conf = (1) * 1.625
 
 DMV_vermenagna_Italgen = 1 * 0.623
 DMV_vermenagna_conf = 1 * 0.623
@@ -103,19 +107,26 @@ Q_g_valle_gesso_conc_d={
 Q_g_valle_gesso_eff_d = Q_g_valle_gesso_conc_d
 
 Q_Bealera_Maestra_conc_d={
-    "Q BM Gesso_Stura" : 6,
+    "Q BM Gesso" : 3,
+    "Q BM Stura" : Q_BM_Stura
 }
 Q_Bealera_Maestra_eff_d = Q_Bealera_Maestra_conc_d
 
 Q_Bealera_Maestra_complessiva_conc_d={
+    "Q BM Gesso_Stura" : 6,
+    "Q BM Nuovo Canale" : 1.80,
+    "Q BM Bealerasso" : 0.1,
+    "Q BM SA" : 0.5,
+    "Q BM Pozzi": 1.80
+}
+
+Q_Bealera_Maestra_complessiva_eff_d={
     "Q BM Gesso_Stura" : 6,
     "Q BM Nuovo Canale" : Q_BM_NuovoCanale,
     "Q BM Bealerasso" : Q_BM_Bealerasso,
     "Q BM SA" : Q_BM_Sa,
     "Q BM Pozzi": Q_BM_Pozzi
 }
-Q_Bealera_Maestra_complessiva_eff_d = Q_Bealera_Maestra_complessiva_conc_d
-
 
 #FABBISOGNI
 Q_consortia_Italgen_Gesso_fab_d={
@@ -227,11 +238,14 @@ if Q_gesso_res >= Q_consortia_Italgen_Gesso_conc_totale + Q_consortia_Sinistra_G
     Q_disp_v_nodo_3 = Q_disp_m_nodo_3 - Q_Sinistra_Gesso
     Q_res_v_nodo_3 = Q_disp_v_nodo_3 + DMV_gesso_conf
 
+    GS_sx = (Q_Sinistra_Gesso / Q_consortia_Sinistra_Gesso_conc_totale) * 100
+
 
 elif (Q_gesso_res < Q_consortia_Italgen_Gesso_conc_totale + Q_consortia_Sinistra_Gesso_conc_totale + DMV_gesso_Italgen) and (Q_gesso_res >= Q_lim_conc):
     print("caso 2")
     Q_sx_conc_disp = Q_gesso_res - Q_consortia_Italgen_Gesso_conc_totale - DMV_gesso_Italgen
     fattore_riparto_sx_conc = Q_sx_conc_disp / Q_consortia_Sinistra_Gesso_conc_totale
+    print(fattore_riparto_sx_conc)
 
     Q_consortia_Sinistra_Gesso_eff_d.update((consortium, Q * fattore_riparto_sx_conc) for consortium, Q in Q_consortia_Sinistra_Gesso_eff_d.items())
     Q_consortia_Sinistra_Gesso_eff_l = [x for x in Q_consortia_Sinistra_Gesso_eff_d.values()]
@@ -262,13 +276,18 @@ elif (Q_gesso_res < Q_consortia_Italgen_Gesso_conc_totale + Q_consortia_Sinistra
     Q_disp_v_nodo_3 = Q_disp_m_nodo_3 - Q_Sinistra_Gesso
     Q_res_v_nodo_3 = Q_disp_v_nodo_3 + DMV_gesso_conf
     
+    GS_sx = (Q_Sinistra_Gesso / Q_consortia_Sinistra_Gesso_conc_totale) * 100
 
 
 elif (Q_gesso_res <= Q_lim_conc) and (Q_gesso_disp >= 0):
     print("caso 3")
     Q_gesso_Italgen_disp = Q_gesso_res - DMV_gesso_Italgen
     fattore_riparto_1 = Q_gesso_Italgen_disp / Q_consortia_Italgen_Gesso_fab_totale
-    # print(fattore_riparto_1)
+    if fattore_riparto_1 >= 1:
+        fattore_riparto_1 = 1
+    else:
+        pass
+    print(fattore_riparto_1)
 
     Q_consortia_Italgen_Gesso_fab_eff_d.update((consortium, Q * fattore_riparto_1) for consortium, Q in Q_consortia_Italgen_Gesso_fab_eff_d.items())
     Q_consortia_Italgen_Gesso_fab_eff_l = [x for x in Q_consortia_Italgen_Gesso_fab_eff_d.values()]
@@ -295,11 +314,13 @@ elif (Q_gesso_res <= Q_lim_conc) and (Q_gesso_disp >= 0):
     
     Q_disp_m_nodo_1 = Q_gesso_res - DMV_gesso_Italgen
     Q_disp_v_nodo_1 = Q_disp_m_nodo_1 - Q_Italgen_irr - Q_Madonna_Bruna - Q_italgen_idroelettrico
-    Q_res_nodo_1 = Q_disp_v_nodo_1 + DMV_gesso_Italgen
+    Q_res_v_nodo_1 = Q_disp_v_nodo_1 + DMV_gesso_Italgen
 
     Q_disp_m_nodo_3 = Q_disp_v_nodo_1
     Q_disp_v_nodo_3 = Q_disp_m_nodo_3 - Q_Sinistra_Gesso
     Q_res_v_nodo_3 = Q_disp_v_nodo_3 + DMV_gesso_conf
+
+    GS_sx = (Q_Sinistra_Gesso / Q_consortia_Italgen_Gesso_fab_totale) * 100
 
 
 else:
@@ -334,6 +355,8 @@ else:
     Q_disp_m_nodo_3 = Q_disp_v_nodo_1
     Q_disp_v_nodo_3 = Q_disp_m_nodo_3 - Q_Sinistra_Gesso
     Q_res_v_nodo_3 = Q_disp_v_nodo_3 + DMV_gesso_conf
+
+    GS_sx = (Q_Sinistra_Gesso / Q_consortia_Italgen_Gesso_fab_totale) * 100
 
 Q_res_m_nodo_6 = Q_res_v_nodo_3 - Q_inf_m_conf
 # Q_gesso_residuo_confluenza = Q_res_m_nodo_6
@@ -401,6 +424,7 @@ Q_Italgen_ord = Q_Naviglio + Q_disp_Italgen_idro + Q_Italgen_Vermenagna_eff_d["Q
 Q_disp_NV_ord = Q_Italgen_ord
 
 Q_NV_conc = Q_Nav_Ver_conc_d["Q Naviglio"] + Q_Nav_Ver_conc_d["Q Vermenagna"]
+Q_NV_report = Q_NV_conc
 
 if Q_disp_NV_ord >= Q_NV_conc:
     Q_NV_eff = Q_NV_conc
@@ -442,6 +466,14 @@ Q_Italgen_45gg_eff_d.update((consortium, Q * fattore_riparto_2) for consortium, 
 Q_Italgen_45gg_eff_l = [x for x in Q_Italgen_45gg_eff_d.values()]
 Q_Italgen_45gg_eff_a = np.array(Q_Italgen_45gg_eff_l)
 Q_Italgen_45gg_eff_totale = float(np.sum(Q_Italgen_45gg_eff_a))
+
+Q_Vg_1 = Q_Italgen_45gg_eff_totale
+
+Q_Naviglio_integrativa = Q_Italgen_45gg_eff_d["Q Naviglio-Vermenagna 45gg"]
+Q_Garavella_integrativa = Q_Italgen_45gg_eff_d["Q Garavella 45gg"]
+Q_Bealera_Maestra_integrativa = Q_Italgen_45gg_eff_d["Q Bealera Maestra 45gg"]
+
+Q_Vg_2 = Q_Vg_1 - Q_Naviglio_integrativa
 
 Q_Italgen_NV_pres = Q_Nav_Ver_eff_totale + Q_Italgen_45gg_eff_totale
 
@@ -507,25 +539,74 @@ Q_res_v_nodo_8 = Q_disp_m_nodo_8 - Q_g_valle_gesso_eff_totale + DMV_gesso_valle_
 
 #Bealera Maestra
 
-Q_res_m_nodo_9 = Q_res_v_nodo_8 - Q_inf_2 + Q_dep
+# Q_res_m_nodo_9 = Q_res_v_nodo_8 - Q_inf_2 + Q_dep
+Q_res_m_nodo_9 = Q_res_v_nodo_8 - Q_inf_2
 
 Q_disp_m_nodo_9 = Q_res_m_nodo_9 - DMV_gesso_conf_stura
 
 Q_disp_BM = Q_disp_m_nodo_9
 
-if Q_disp_BM >= Q_Bealera_Maestra_conc_d["Q BM Gesso_Stura"]:
-    Q_BM_eff = Q_Bealera_Maestra_conc_d["Q BM Gesso_Stura"]
-elif (Q_disp_BM  > 0) and (Q_disp_BM  < Q_Bealera_Maestra_conc_d["Q BM Gesso_Stura"]):
-    Q_BM_eff = Q_disp_BM
+if Q_disp_BM >= Q_Bealera_Maestra_conc_d["Q BM Gesso"]:
+    Q_BM_gesso_eff = Q_Bealera_Maestra_conc_d["Q BM Gesso"]
+elif (Q_disp_BM  > 0) and (Q_disp_BM  < Q_Bealera_Maestra_conc_d["Q BM Gesso"]):
+    Q_BM_gesso_eff = Q_disp_BM
 else:
-    Q_BM_eff = 0
+    Q_BM_gesso_eff = 0
 
-Q_Bealera_Maestra_eff_d["Q BM Gesso_Stura"]=Q_BM_eff
+Q_Bealera_Maestra_eff_d["Q BM Gesso"] = Q_BM_gesso_eff
+Q_Bealera_Maestra_eff_d["Q BM Stura"] = Q_BM_Stura
+Q_Bealera_Maestra_eff_l = [x for x in Q_Bealera_Maestra_eff_d.values()]
+Q_Bealera_Maestra_eff_a = np.array(Q_Bealera_Maestra_eff_l)
+Q_Bealera_Maestra_eff_totale = float(np.sum(Q_Bealera_Maestra_eff_a))
 
-Q_disp_v_nodo_9 = Q_disp_m_nodo_9 - Q_BM_eff
-Q_res_v_nodo_9 = Q_disp_m_nodo_9 - Q_BM_eff + DMV_gesso_conf_stura
+Q_BM_eff = Q_Bealera_Maestra_eff_totale + Q_dep
+
+Q_disp_v_nodo_9 = Q_disp_m_nodo_9 - Q_BM_gesso_eff
+Q_res_v_nodo_9 = Q_disp_m_nodo_9 - Q_BM_gesso_eff + DMV_gesso_conf_stura
 
 Q_gesso_residuo_confluenza_stura = Q_res_v_nodo_9
+
+#### GRADI DI SODDISFACIMENTO
+
+# Naviglio Vermenagna
+Q_NV_report_eff_no_int = Q_Nav_Ver_eff_totale
+Q_NV_report_eff_con_int = Q_Nav_Ver_eff_totale + Q_Naviglio_integrativa
+
+GS_NV_no_int = (Q_NV_report_eff_no_int / Q_NV_report) * 100
+GS_NV_int = (Q_NV_report_eff_con_int / Q_NV_report) * 100
+
+print(GS_NV_no_int)
+
+# Bealera Maestra
+Q_Bealera_Maestra_complessiva_eff_d["Q BM Gesso_Stura"] = Q_BM_eff
+Q_Bealera_Maestra_complessiva_eff_l = Q_Bealera_Maestra_complessiva_eff_d.values()
+Q_Bealera_Maestra_complessiva_eff_totale = float(sum(Q_Bealera_Maestra_complessiva_eff_l))
+
+Q_Bealera_Maestra_complessiva_conc_l = Q_Bealera_Maestra_complessiva_conc_d.values()
+Q_Bealera_Maestra_complessiva_conc_totale = float(sum(Q_Bealera_Maestra_complessiva_conc_l))
+
+Q_BM_report_eff_no_int = Q_Bealera_Maestra_complessiva_eff_totale
+Q_BM_report_eff_con_int = Q_Bealera_Maestra_complessiva_eff_totale + Q_Bealera_Maestra_integrativa
+
+GS_BM_no_int = (Q_BM_report_eff_no_int / Q_Bealera_Maestra_complessiva_conc_totale) * 100
+GS_BM_int = (Q_BM_report_eff_con_int / Q_Bealera_Maestra_complessiva_conc_totale) *100
+
+print(GS_BM_no_int)
+
+#Sinistra Gesso
+#GIÀ CALCOLATO NEI CASI
+
+print(GS_sx)
+
+#Asselle
+Q_sx_report_conc = Q_g_valle_gesso_eff_totale
+Q_sx_report_conc_NV = Q_g_valle_gesso_eff_totale + Q_NV_a_sx
+# Q_sx_report_fab
+GS_sx = (Q_g_valle_gesso_eff_totale / Q_VG_conc) * 100
+GS_sx_NV = (Q_sx_report_conc_NV / Q_VG_conc) * 100
+
+print(GS_sx)
+
 
 fn="C:/Users/alejo/OneDrive - STUDIO PD SRL/PD 2020/01 CONSORZI IRRIGUI/02 BEALERA MAESTRA/08 CONFLUENZA GESSO STURA/x QGIS_BASI/TEMP_per_bilancio_idrico_Python/Nodi_BI_calcoli_p.shp"
 layer=QgsVectorLayer(fn,'','ogr')
@@ -588,7 +669,10 @@ Q_nodi_d = {
     "Q Italgen Nav-Verm rest" : Q_Italgen_NV_rest,
     "Q Italgen Nav-Verm presa" : Q_Italgen_NV_pres,
     "Q Nav-Verm ord" : Q_Nav_Ver_eff_totale,
-    "Q Italgen int" : Q_Italgen_45gg_eff_totale,
+    "Q VG 1" : Q_Vg_1,
+    "Q VG 2" : Q_Vg_2,
+    "Q Naviglio integrativa" : Q_Naviglio_integrativa,
+    "Q Garavella integrativa" : Q_Garavella_integrativa,
     "Q Italgen in Gesso" : Q_Italgen_a_Gesso,
     "Q res m nodo 6" : Q_res_m_nodo_6,
     "Q res nodo 6" : Q_res_nodo_6,
@@ -607,7 +691,10 @@ Q_nodi_d = {
     "Q Depuratore" : Q_dep,
     "Q inf 2" : Q_inf_2,
     "Q disp m nodo 9" : Q_disp_m_nodo_9,
+    "Q BM Stura" : Q_BM_Stura,
+    "Q BM Gesso" : Q_BM_gesso_eff,
     "Q Bealera Maestra" : Q_BM_eff,
+    "Q Bealera Maestra integrativa" : Q_Bealera_Maestra_integrativa,
     "Q disp v nodo 9" : Q_disp_v_nodo_9,
     "Q res v nodo 9" : Q_res_v_nodo_9,
 }

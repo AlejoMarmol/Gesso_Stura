@@ -131,15 +131,14 @@ class River():
             return [self, River_av]
         
     # ------------------------------------------------------------------------- 
-    def get_all_presa(self,df_node):
+    def _flow_presa(self):
         """
         Calculate all the flow need for the presa inside 
         """
          
         self.flow_presa = 0
-        for node in self.list_Node:
+        for node in self.list_node:
             presa = node.get_tipo_value('Presa')
-            print(node.number)
             self.flow_presa += presa
         
         return self.flow_presa
@@ -399,7 +398,9 @@ class Node():
         get the flow which is realized into the river after the node
         """
         # calculate the flow going into the river
-        self.flow_out = self.get_tipo_value('Presa') + self.get_tipo_value('Inflitration')
+        flow_presa = self.get_tipo_value('Presa')
+        flow_inflitrazion = self.get_tipo_value('Inflitration')
+        self.flow_out = flow_presa + flow_inflitrazion
         
                 
         # calculate the flow available  
@@ -412,27 +413,7 @@ class Node():
         else :
             
             return 0
-# ----------------------------------------------------------------------------         
-#            " Maybe useful function"
-#    def calculate_flow_in(self):
-#        """
-#        Sum all the flow arriving to the node
-#        """
-#        self.flow_in = 0
-#        self.list_flow_in = []
-#        
-#        # if the available flow exist, set it value :
-#        self.set_flow_disp()
-#        
-#        # calculate the flow in 
-#        for flow in self.list_flow :
-#            flow.set_sign()
-#            if flow.sign > 0 :
-#                self.flow_in += flow.value
-#                self.list_flow_in.append(flow)
-#                
-#        return self.flow_in
-# -----------------------------------------------------------------------------   
+
 
 # %%  
 # =============================================================================
@@ -588,6 +569,5 @@ if __name__ == '__main__':
     
     gesso_am = list_rivers[0]
     section_0_1 = gesso_am.list_section[0]
-#
-#    gesso_am.create_Node(df_node)
-#    node_list = gesso_am.list_Node
+    node_1 = gesso_am.list_node[1]
+    node_1_1 = node_1.subNode[1]

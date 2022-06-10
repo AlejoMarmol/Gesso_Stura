@@ -14,7 +14,6 @@ Q_ENEL_ord=2.000
 Q_ENEL_45gg=0.000
 Q_vermenagna=3.000
 Q_lim_conc = 6.000
-ripartizione_limite = 1
 
 Q_BM_Stura = 2.50
 Q_NV_a_sx = 0.40
@@ -657,6 +656,7 @@ Q_nodi_d = {
     "Q Scarico ENEL 45gg" : Q_Scarico_ENEL_45gg,
     "Q disp m nodo 1" : Q_disp_m_nodo_1,
     "Q Bedale" : Q_Bedale,
+    "Q Naviglio" : Q_Naviglio,
     "Q Italgen irr" : Q_Italgen_irr,
     "Q Italgen Gesso idro" : Q_disp_Italgen_idro,
     "Q Italgen 45 gg" : Q_Italgen_45gg_eff_totale,

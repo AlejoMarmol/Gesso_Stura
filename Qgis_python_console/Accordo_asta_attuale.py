@@ -9,12 +9,11 @@ import numpy as np
 #Q_ENEL_45gg=float(input('Introduca Q ENEL 45gg: '))
 #Q_vermenagna=float(input('Introduca Q vermenagna: '))
 
-Q_gesso=2.000
+Q_gesso=3.000
 Q_ENEL_ord=2.000
 Q_ENEL_45gg=0.000
-Q_vermenagna=3.000
-Q_lim_conc = 6.000
-ripartizione_limite = 1
+Q_vermenagna=2.500
+Q_lim_conc = 5.000
 
 Q_BM_Stura = 2.50
 Q_NV_a_sx = 0.40
@@ -38,11 +37,11 @@ DMV_gesso_conf = (1) * 1.625
 DMV_vermenagna_Italgen = 1 * 0.623
 DMV_vermenagna_conf = 1 * 0.623
 
-DMV_gesso_valle_confluenza = 1 * 3.057
+DMV_gesso_valle_confluenza = (1/3) * 3.057
 
-DMV_dx_gesso = 1 * 3.057
+DMV_dx_gesso = (1) * 3.057
 
-DMV_gesso_conf_stura = 1 * 4.762
+DMV_gesso_conf_stura = (1) * 4.762
 
 #Input values regarding water demand
 #Q_BM_NuovoCanale=float(input('Introduca Q BM da Nuovo Canale: '))
@@ -211,61 +210,35 @@ Q_consortia_Italgen_Gesso_fab_l=[x for x in Q_consortia_Italgen_Gesso_fab_d.valu
 Q_consortia_Italgen_Gesso_fab_a=np.array(Q_consortia_Italgen_Gesso_fab_l)
 Q_consortia_Italgen_Gesso_fab_totale = float(np.sum(Q_consortia_Italgen_Gesso_fab_a))
 
-if Q_gesso_res >= Q_consortia_Italgen_Gesso_conc_totale + Q_consortia_Sinistra_Gesso_conc_totale + DMV_gesso_Italgen:
+if Q_gesso_res >= Q_lim_conc :
     print("caso 1")
-    print("tutti soddisfatti")
+    print("Sopra limite")
     # print(Q_consortia_Italgen_Gesso_conc_totale + Q_consortia_Sinistra_Gesso_conc_totale + DMV_gesso_Italgen)
     
+    Q_gesso_Italgen_disp = Q_gesso_res - DMV_gesso_Italgen
+
     Q_Bedale = Q_consortia_Italgen_Gesso_conc_d["Q Bedale"]
-    Q_Naviglio = Q_consortia_Italgen_Gesso_conc_d["Q Naviglio"]
-    Q_Italgen_irr = Q_Naviglio + Q_Bedale
     Q_Madonna_Bruna = Q_consortia_Italgen_Gesso_conc_d["Q Madonna Bruna"]
     Q_Bealera_Nuova = Q_consortia_Sinistra_Gesso_conc_d["Q Bealera Nuova"]
     Q_sx_non_completo = Q_consortia_Sinistra_Gesso_conc_totale - Q_Bealera_Nuova
     Q_Sinistra_Gesso = Q_consortia_Sinistra_Gesso_conc_totale
-    Q_disp_Italgen_idro = Q_gesso_res - DMV_gesso_Italgen - Q_Italgen_irr - Q_Madonna_Bruna - Q_Sinistra_Gesso
-    if Q_disp_Italgen_idro >= Q_Italgen_Gesso_conc_d["Q Italgen Gesso idroelettrico"]:
-        Q_italgen_idroelettrico = Q_Italgen_Gesso_conc_d["Q Italgen Gesso idroelettrico"]
-        Q_disp_Italgen_idro = Q_italgen_idroelettrico
-    elif (Q_disp_Italgen_idro > 0) and (Q_disp_Italgen_idro < Q_Italgen_Gesso_conc_d["Q Italgen Gesso idroelettrico"]):
-        Q_italgen_idroelettrico = Q_disp_Italgen_idro
+    Q_disp_Naviglio = Q_gesso_Italgen_disp - Q_Bedale - Q_Madonna_Bruna - Q_Sinistra_Gesso
+
+    if Q_disp_Naviglio >= Q_consortia_Italgen_Gesso_conc_d["Q Naviglio"]:
+        Q_Naviglio = Q_consortia_Italgen_Gesso_conc_d["Q Naviglio"]
+        Q_disp_Italgen_idro = Q_disp_Naviglio - Q_Naviglio
+    elif (Q_disp_Naviglio < Q_consortia_Italgen_Gesso_conc_d["Q Naviglio"]) and (Q_disp_Naviglio > 0):
+        Q_Naviglio = Q_disp_Naviglio
+        Q_disp_Italgen_idro = 0
     else:
-        Q_italgen_idroelettrico = 0
-        Q_disp_Italgen_idro = Q_italgen_idroelettrico
-    
-    Q_disp_m_nodo_1 = Q_gesso_res - DMV_gesso_Italgen
-    Q_disp_v_nodo_1 = Q_disp_m_nodo_1 - Q_Italgen_irr - Q_Madonna_Bruna - Q_italgen_idroelettrico
-    Q_res_v_nodo_1 = Q_disp_v_nodo_1 + DMV_gesso_Italgen
+        Q_Naviglio = 0
+        Q_disp_Italgen_idro = 0
 
-    Q_disp_m_nodo_3 = Q_disp_v_nodo_1
-    Q_disp_v_nodo_3 = Q_disp_m_nodo_3 - Q_Sinistra_Gesso
-    Q_res_v_nodo_3 = Q_disp_v_nodo_3 + DMV_gesso_conf
-
-    GS_sx = (Q_Sinistra_Gesso / Q_consortia_Sinistra_Gesso_conc_totale) * 100
-
-
-elif (Q_gesso_res < Q_consortia_Italgen_Gesso_conc_totale + Q_consortia_Sinistra_Gesso_conc_totale + DMV_gesso_Italgen) and (Q_gesso_res >= Q_lim_conc):
-    print("caso 2")
-    Q_sx_conc_disp = Q_gesso_res - Q_consortia_Italgen_Gesso_conc_totale - DMV_gesso_Italgen
-    fattore_riparto_sx_conc = Q_sx_conc_disp / Q_consortia_Sinistra_Gesso_conc_totale
-    print("fattore riparto sx conc")
-    print(fattore_riparto_sx_conc)
-
-    Q_consortia_Sinistra_Gesso_eff_d.update((consortium, Q * fattore_riparto_sx_conc) for consortium, Q in Q_consortia_Sinistra_Gesso_eff_d.items())
-    Q_consortia_Sinistra_Gesso_eff_l = [x for x in Q_consortia_Sinistra_Gesso_eff_d.values()]
-    Q_consortia_Sinistra_Gesso_eff_a = np.array(Q_consortia_Sinistra_Gesso_eff_l)
-    Q_consortia_Sinistra_Gesso_eff_totale = float(np.sum(Q_consortia_Sinistra_Gesso_eff_a))
-
-    Q_Bedale = Q_consortia_Italgen_Gesso_conc_d["Q Bedale"]
-    Q_Naviglio = Q_consortia_Italgen_Gesso_conc_d["Q Naviglio"]
     Q_Italgen_irr = Q_Naviglio + Q_Bedale
-    Q_Madonna_Bruna = Q_consortia_Italgen_Gesso_conc_d["Q Madonna Bruna"]
-    Q_Bealera_Nuova = Q_consortia_Sinistra_Gesso_eff_d["Q Bealera Nuova"]
-    Q_sx_non_completo = Q_consortia_Sinistra_Gesso_eff_totale - Q_Bealera_Nuova
-    Q_Sinistra_Gesso = Q_consortia_Sinistra_Gesso_eff_totale
-    Q_disp_Italgen_idro = Q_gesso_res - DMV_gesso_Italgen - Q_Italgen_irr - Q_Madonna_Bruna - Q_Sinistra_Gesso
+
     if Q_disp_Italgen_idro >= Q_Italgen_Gesso_conc_d["Q Italgen Gesso idroelettrico"]:
         Q_italgen_idroelettrico = Q_Italgen_Gesso_conc_d["Q Italgen Gesso idroelettrico"]
+        Q_disp_Italgen_idro = Q_italgen_idroelettrico
     elif (Q_disp_Italgen_idro > 0) and (Q_disp_Italgen_idro < Q_Italgen_Gesso_conc_d["Q Italgen Gesso idroelettrico"]):
         Q_italgen_idroelettrico = Q_disp_Italgen_idro
     else:
@@ -279,45 +252,41 @@ elif (Q_gesso_res < Q_consortia_Italgen_Gesso_conc_totale + Q_consortia_Sinistra
     Q_disp_m_nodo_3 = Q_disp_v_nodo_1
     Q_disp_v_nodo_3 = Q_disp_m_nodo_3 - Q_Sinistra_Gesso
     Q_res_v_nodo_3 = Q_disp_v_nodo_3 + DMV_gesso_conf
-    
+
     GS_sx = (Q_Sinistra_Gesso / Q_consortia_Sinistra_Gesso_conc_totale) * 100
 
 
 elif (Q_gesso_res <= Q_lim_conc) and (Q_gesso_disp >= 0):
 
-    print("caso 3")
+    print("Caso con regola ripartizione attuale")
 
     Q_gesso_Italgen_disp = Q_gesso_res - DMV_gesso_Italgen
+        
+    Q_Bedale = Q_consortia_Italgen_Gesso_conc_d["Q Bedale"]
+    Q_Madonna_Bruna = Q_consortia_Italgen_Gesso_conc_d["Q Madonna Bruna"]
 
-    fattore_riparto_1 = Q_gesso_Italgen_disp / Q_consortia_Italgen_Gesso_fab_totale
+    Q_gesso_Italgen_disp = Q_gesso_Italgen_disp - Q_Bedale - Q_Madonna_Bruna
 
-    if fattore_riparto_1 >= 1:
-        fattore_riparto_1 = 1
-    else:
-        pass
+    Q_Naviglio = (64.4/100) * Q_gesso_Italgen_disp
+    Q_Bealera_Nuova = (8.0/100) * Q_gesso_Italgen_disp
+    Q_sx_non_completo = (27.6/100) * Q_gesso_Italgen_disp
+    Q_Sinistra_Gesso = Q_Bealera_Nuova + Q_sx_non_completo
 
-    print("fattore riparto 1")
-    print(fattore_riparto_1)
 
-    Q_consortia_Italgen_Gesso_fab_eff_d.update((consortium, Q * fattore_riparto_1) for consortium, Q in Q_consortia_Italgen_Gesso_fab_eff_d.items())
-    Q_consortia_Italgen_Gesso_fab_eff_l = [x for x in Q_consortia_Italgen_Gesso_fab_eff_d.values()]
-    Q_consortia_Italgen_Gesso_fab_eff_a = np.array(Q_consortia_Italgen_Gesso_fab_eff_l)
-    Q_consortia_Italgen_Gesso_fab_eff_totale = float(np.sum(Q_consortia_Italgen_Gesso_fab_eff_a))
-    # print(Q_consortia_Italgen_Gesso_fab_eff_totale)
-
-    Q_Bedale = Q_consortia_Italgen_Gesso_fab_eff_d["Q Bedale"]
-    Q_Naviglio = Q_consortia_Italgen_Gesso_fab_eff_d["Q Naviglio"]
-    # print(Q_Naviglio)
+        # Q_Naviglio = Q_consortia_Italgen_Gesso_fab_eff_d["Q Naviglio"]
+        # # print(Q_Naviglio)
     Q_Italgen_irr = Q_Naviglio + Q_Bedale
-    Q_Madonna_Bruna = Q_consortia_Italgen_Gesso_fab_eff_d["Q Madonna Bruna"]
-    Q_Bealera_Nuova = Q_consortia_Italgen_Gesso_fab_eff_d["Q Bealera Nuova"]
-    Q_Sinistra_Gesso = Q_consortia_Italgen_Gesso_fab_eff_d["Q Bealera Nuova"] + Q_consortia_Italgen_Gesso_fab_eff_d["Q Bealera Grossa e Pravero"] + Q_consortia_Italgen_Gesso_fab_eff_d["Q Piattonea e David"] + Q_consortia_Italgen_Gesso_fab_eff_d["Q Gerbina"]
-    Q_sx_non_completo = Q_Sinistra_Gesso - Q_Bealera_Nuova
+        
+        # Q_Bealera_Nuova = Q_consortia_Italgen_Gesso_fab_eff_d["Q Bealera Nuova"]
+        # Q_Sinistra_Gesso = Q_consortia_Italgen_Gesso_fab_eff_d["Q Bealera Nuova"] + Q_consortia_Italgen_Gesso_fab_eff_d["Q Bealera Grossa e Pravero"] + Q_consortia_Italgen_Gesso_fab_eff_d["Q Piattonea e David"] + Q_consortia_Italgen_Gesso_fab_eff_d["Q Gerbina"]
+        # Q_sx_non_completo = Q_Sinistra_Gesso - Q_Bealera_Nuova
+
+
     Q_disp_Italgen_idro = Q_gesso_res - DMV_gesso_Italgen - Q_Italgen_irr - Q_Madonna_Bruna - Q_Sinistra_Gesso
     if Q_disp_Italgen_idro >= Q_Italgen_Gesso_conc_d["Q Italgen Gesso idroelettrico"]:
-        Q_italgen_idroelettrico = Q_Italgen_Gesso_conc_d["Q Italgen Gesso idroelettrico"]
+            Q_italgen_idroelettrico = Q_Italgen_Gesso_conc_d["Q Italgen Gesso idroelettrico"]
     elif (Q_disp_Italgen_idro > 0) and (Q_disp_Italgen_idro < Q_Italgen_Gesso_conc_d["Q Italgen Gesso idroelettrico"]):
-        Q_italgen_idroelettrico = Q_disp_Italgen_idro
+            Q_italgen_idroelettrico = Q_disp_Italgen_idro
     else:
         Q_italgen_idroelettrico = 0
         Q_disp_Italgen_idro = Q_italgen_idroelettrico
@@ -330,8 +299,8 @@ elif (Q_gesso_res <= Q_lim_conc) and (Q_gesso_disp >= 0):
     Q_disp_v_nodo_3 = Q_disp_m_nodo_3 - Q_Sinistra_Gesso
     Q_res_v_nodo_3 = Q_disp_v_nodo_3 + DMV_gesso_conf
 
-    GS_sx = (Q_Sinistra_Gesso / Q_sx_Gesso_fab_totale) * 100
-    print(Q_consortia_Italgen_Gesso_fab_d["Q Bealera Nuova"])
+    GS_sx = (Q_Sinistra_Gesso / Q_consortia_Sinistra_Gesso_conc_totale) * 100
+
 
 
 else:
@@ -657,6 +626,7 @@ Q_nodi_d = {
     "Q Scarico ENEL 45gg" : Q_Scarico_ENEL_45gg,
     "Q disp m nodo 1" : Q_disp_m_nodo_1,
     "Q Bedale" : Q_Bedale,
+    "Q Naviglio" : Q_Naviglio,
     "Q Italgen irr" : Q_Italgen_irr,
     "Q Italgen Gesso idro" : Q_disp_Italgen_idro,
     "Q Italgen 45 gg" : Q_Italgen_45gg_eff_totale,
@@ -730,7 +700,7 @@ Q_report_normale_d = {
     "Sinistra Gesso" : [Q_consortia_Sinistra_Gesso_conc_totale, Q_sx_Gesso_fab_totale, Q_Sinistra_Gesso, Q_Sinistra_Gesso, GS_sx, GS_sx, (100-GS_sx), (100-GS_sx)]
 }
 
-fn="C:/Users/alejo/OneDrive - STUDIO PD SRL/PD 2020/01 CONSORZI IRRIGUI/02 BEALERA MAESTRA/08 CONFLUENZA GESSO STURA/x QGIS_BASI/TEMP_per_bilancio_idrico_Python/Nodi_BI_calcoli_p.shp"
+fn="C:/Users/alejo/OneDrive - STUDIO PD SRL/PD 2020/01 CONSORZI IRRIGUI/02 BEALERA MAESTRA/08 CONFLUENZA GESSO STURA/x QGIS_BASI/TEMP_per_bilancio_idrico_Python/Nodi_BI_calcoli_attuali_p.shp"
 layer=QgsVectorLayer(fn,'','ogr')
 layer_provider=layer.dataProvider()
 
@@ -750,7 +720,7 @@ for nodo, Q in Q_nodi_d.items():
         attrs = {flds.indexOf("Q") : Qi}
         layer_provider.changeAttributeValues({fid : attrs})
 
-fn2="C:/Users/alejo/OneDrive - STUDIO PD SRL/PD 2020/01 CONSORZI IRRIGUI/02 BEALERA MAESTRA/08 CONFLUENZA GESSO STURA/x QGIS_BASI/TEMP_per_bilancio_idrico_Python/Nodi_BI_report_p.shp"
+fn2="C:/Users/alejo/OneDrive - STUDIO PD SRL/PD 2020/01 CONSORZI IRRIGUI/02 BEALERA MAESTRA/08 CONFLUENZA GESSO STURA/x QGIS_BASI/TEMP_per_bilancio_idrico_Python/Nodi_BI_report_attuale_p.shp"
 layer2=QgsVectorLayer(fn2,'','ogr')
 layer_provider=layer2.dataProvider()
 
@@ -775,7 +745,7 @@ for nodo, gs_l in Q_report_normale_d.items():
 
 
 
-fn3="C:/Users/alejo/OneDrive - STUDIO PD SRL/PD 2020/01 CONSORZI IRRIGUI/02 BEALERA MAESTRA/08 CONFLUENZA GESSO STURA/x QGIS_BASI/TEMP_per_bilancio_idrico_Python/Nodi_BI_report_int_p.shp"
+fn3="C:/Users/alejo/OneDrive - STUDIO PD SRL/PD 2020/01 CONSORZI IRRIGUI/02 BEALERA MAESTRA/08 CONFLUENZA GESSO STURA/x QGIS_BASI/TEMP_per_bilancio_idrico_Python/Nodi_BI_report_int_attuale_p.shp"
 layer3=QgsVectorLayer(fn3,'','ogr')
 layer_provider=layer3.dataProvider()
 

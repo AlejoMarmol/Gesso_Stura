@@ -1,5 +1,4 @@
 import processing
-import tool_function 
 
 import time
 start_time = time.time()
@@ -8,30 +7,18 @@ start_time = time.time()
 #                              path of the input 
 # ------------------------------------------------------------------------------
 # import the shape file 
-path = "C:/Users/clemo/Documents/Italie/Studio PD/QGIS/Georeference/"
-cadastre = path+"Cuneo_shapefile/all 2021.shp"
-polygone = "Test_polygons.shp"
+path = "C:/Users/clemo/Documents/Italie/Studio PD/QGIS/info/"
+cadastre_file = path+"Cuneo_shapefile/all 2021.shp"
 
 
-# ------------------------------------------------------------------------------
-#                       get the list of crops inside the polygone
-# ------------------------------------------------------------------------------
-list_crop = get_list_crops(path, polygone, cadastre)
+# consortia layer and plot
+cadastre_layer = QgsVectorLayer(cadastre_file, "all", "ogr")
+QgsProject.instance().addMapLayer(cadastre_layer)
 
-
-# ------------------------------------------------------------------------------
-#                               centroids of polygon
-# ------------------------------------------------------------------------------ 
-centroids_output = path + "centroids.shp"
-centroids_output = centroids(path+input, centroids_output)
-
-
-# ------------------------------------------------------------------------------
-#                               water need for each crop
-# ------------------------------------------------------------------------------ 
-dict_crop_wn_medi, dict_crop_wn_sup = get_all_crops_needs( list_crop, centroids_output)
+idx = cadastre_layer.fields().indexOf('cens_liv4')
+values = cadastre_layer.uniqueValues(idx)
                 
-                
+print(values)
 # ------------------------------------------------------------------------------
 #                               print the results
 # ------------------------------------------------------------------------------ 

@@ -6,7 +6,12 @@ import xlwt
 # %% ===========================================================================
 #                         Dictionnary of coordinate for excel
 # ==============================================================================
-list_non_desired_crop = ['_N.D.', '_N_D', 'Altra Superficie','Terreni a riposo']
+list_non_desired_crop = ['ORZO','_N.D.','NULL',
+                         'FRUMENTO TENERO E SPELTA',
+                         'ALTRA SUPERFICIE',
+                         'FRUMENTO DURO',
+                         'TERRENI A RIPOSO, SENZA AIUTO',
+                         'NOCCIOLO']
 
 
 

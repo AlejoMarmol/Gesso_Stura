@@ -33,29 +33,73 @@ dict_perma_matrix  = {('Bassa','1-2'): 0 , ('Media','1-2'): 0 , ('Alta','1-2'): 
 
 # associate each type of crops with the type of crops desired in quant 4 
 dict_type_crops = {
-    '_N_D': 'null',
-    '_N.D.': 'null',
-    'Altra arboricoltura da legno' : 'null',
-    'Altra Superficie' : 'null',
-    'Altre coltivazioni legnose agrarie' : 'null',
-    'Boschi' : 'prato',
-    'Cereali' : 'prato',
-    'Fiori e piante ornamentali' : 'frutteto',
-    'Foraggere avvicendate' : 'prato',
-    'Fruttiferi' : 'frutteto',
-    'Legumi secchi': 'prato',
-    'Olivo': 'mais',
-    'Orti familiari' : 'mais',
-    'Ortive' : 'mais',
-    'Patata' : 'mais',
-    'Piante industriali' : 'mais',
-    'Prati permanenti e pascoli' : 'prato',
-    'Pioppeti': 'mais',
-    'Sementi e Piantine': 'mais',
-    'Terreni a riposo' : 'null',
-    'Vite' : 'null',
-    'Vivai' : 'null'
-    }
+ 'ALTRA ARBORICOLTURA DA LEGNO': 'null',
+ 'POMODORO DA MENSA' : 'null' , 
+ 'SOIA': 'null',
+ '_N.D.': 'null', 
+  NULL: 'null',
+ 'ALTRI CEREALI' : 'null',
+ 'ALTRI LEGUMI SECCHI' : 'null',
+ 'FAGIUOLI SECCHI' : 'null',
+ 'GIRASOLE': 'null',
+ 'ALTRA FRUTTA TEMPERATA': 'frutteto',
+ 'PATATA': 'null',
+ 'GRANTURCO A MATURAZIONE CEROSA': 'mais',
+ 'ALTRI PRATI AVVICENDATI': 'prato',
+ 'SEMENTI': 'null', # marcella
+ 'FAVA': 'null', # marcella
+ 'CASTAGNO': 'null', # marcella
+ 'ALTRE ORTIVE IN ORTI STAB. O IND.': 'null',
+ 'PRATI PERMANENTI': 'prato',
+ 'ALBICOCCO': 'frutteto',
+ 'AVENA': 'null', # marcella
+ 'VIVAI,ALTRI': 'null',  # marcella
+ 'ORZO': 'null', 
+ 'VIVAI,PIANTE ORNAMENTALI': 'null', # marcella
+ 'MANDORLO': 'null', # marcella
+ 'PIANTE AROMATICHE, MEDICINALI E COND.': 'null', # marcella
+ 'ALTRA SUPERFICIE': 'null',
+ 'ALTRI ERBAI MONOFITI DI CEREALI': 'prato',
+ 'PERO': 'frutteto', 
+ 'NETTARINA': 'frutteto',
+ 'OLIVO PER OLIO': 'null',
+ 'GRANTURCO IN ERBA': 'mais' ,
+ 'GRANTURCO': 'mais',   
+ 'RISO': 'riso',
+ 'ALTRE PIANTE DA SEMI OLEOSI': 'null',
+ 'MELO': 'frutteto',
+ 'ORTI FAMILIARI': 'null',
+ 'FIORI E PIANTE ORNAMENTALI IN PIENA ARIA': 'null',
+ 'FRUTTA A GUSCIO, ALTRA': 'null',
+ 'LUPPOLO': 'null', # marcella
+ 'NOCE': 'null', # marcella
+ 'ALTRE PIANTE INDUSTRIALI': 'null', # marcella
+ 'ALTRI ERBAI': 'prato',
+ 'SEMI DI LINO': 'null',# marcella
+ 'POMODORO DA INDUSTRIA': 'null',
+ 'OLIVO DA TAVOLA': 'null',
+ 'FRUMENTO TENERO E SPELTA': 'null',
+ 'PESCO': 'frutteto',
+ 'PIOPPETI': 'null', # marcella
+ 'PASCOLI': 'prato',
+ 'ALTRE COLTIVAZIONI LEGNOSE AGRARIE': 'null',# marcella
+ 'CANAPA': 'null', # marcella
+ 'FIORI PROTETTI IN SERRA': 'null',  # marcella
+ 'CILIEGIO': 'frutteto',
+ 'SORGO': 'null',
+ 'FRUMENTO DURO': 'null',
+ 'PISELLO SECCO': 'null',
+ 'TERRENI A RIPOSO, SENZA AIUTO': 'null',
+ 'COLZA E RAVIZZONE': 'prato',
+ 'VITE': 'null', # marcella
+ 'ALTRE ORTIVE DI PIENO CAMPO': 'ORTIVE IN PIENA ARIA',
+ 'ALTRE ORTIVE IN ORTI STAB. O IND.':'ORTIVE IN PIENA ARIA',
+ 'SUSINO': 'frutteto', # marcella
+ 'ERBA MEDICA': 'prato', 
+ 'ACTINIDIA': 'null', # marcella
+ 'NOCCIOLO': 'null', # marcella
+ 'VIVAI, FRUTTIFERI': 'null' # marcella
+ }
 # %% =========================================================================
 #                       Transform shapefile in csv file
 # ============================================================================
@@ -86,7 +130,7 @@ def transform_shp_to_csv(path, layer):
 # %% =========================================================================
 #                       dataframe consortium intersect with comuni
 # ============================================================================
-def collect_all_information(path, layer_cadastre, layer_permeability):
+def collect_all_information(path, layer_cadastre, layer_permeability, id_field_consortia):
     """
     Collect all the information for the crops and for the permeability matrix for 
     all the consortium
@@ -128,7 +172,7 @@ def collect_all_information(path, layer_cadastre, layer_permeability):
 # %% =========================================================================
 #                           collect info consorzi
 # ============================================================================
-def collect_information_consortium(path, layer_cadastre, layer_permeability, consortia):
+def collect_information_consortium(path, layer_cadastre, layer_permeability, consortia, id_field_consortia):
     """
     Collect the information concerning all the municpalities related to 
     the consortium. The information are : the crops, the surface area covered
@@ -189,7 +233,8 @@ def collect_information_consortium(path, layer_cadastre, layer_permeability, con
     # -------------------------------------------------------------------------
     # Collect the data related to the intersection consortium - comuni
     df_consor_n_cada = intersection_cadastre_consorzi(cadastre_info, 
-                                                      consortia, 
+                                                      consortia,
+                                                      id_field_consortia, 
                                                       all_info)
 
     
@@ -197,7 +242,8 @@ def collect_information_consortium(path, layer_cadastre, layer_permeability, con
     #                     Collect the data of permeability
     # -------------------------------------------------------------------------
     df_permeability = collect_data_permeability(permeability_info,
-                                                consortia, 
+                                                consortia,
+                                                id_field_consortia, 
                                                 all_info)
        
     
@@ -224,7 +270,7 @@ def collect_information_consortium(path, layer_cadastre, layer_permeability, con
         # #for the crops and superficy
         df_consor_crop = df_consor_n_cada[(df_consor_n_cada.DENOMINAZI == consortium)]
         
-        df_sum_crop = df_consor_crop.groupby(by = ['cens_liv3']).sum()/10000 # 100000 conversion meters Ha
+        df_sum_crop = df_consor_crop.groupby(by = ['cens_liv4']).sum()/10000 # 100000 conversion meters Ha
         dict_crops_consor = df_sum_crop['particella'].to_dict()
         
         # organize crops 
@@ -249,7 +295,7 @@ def collect_information_consortium(path, layer_cadastre, layer_permeability, con
 #                               collect info for the crops
 # ==============================================================================
     
-def intersection_cadastre_consorzi(cadastre_info, consortia, all_info=False):
+def intersection_cadastre_consorzi(cadastre_info, consortia, id_field_consortia, all_info=False):
     """
     get the consortia inside the the file input cadastre
         
@@ -274,10 +320,11 @@ def intersection_cadastre_consorzi(cadastre_info, consortia, all_info=False):
     # # ------------------------- Collect the data ----------------------------    
     df_consor_n_cada = pd.read_csv(cadastre_info,
                                      encoding = 'utf-8', sep = ',')
-          
+    
+    print(consortia)
     # do we want all the consortium ? 
     if all_info == False :
-        df_consor_n_cada = df_consor_n_cada[df_consor_n_cada['DENOMINAZI'].isin(consortia)]
+        df_consor_n_cada = df_consor_n_cada[df_consor_n_cada[id_field_consortia].isin(consortia)]
 
     return(df_consor_n_cada)
 
@@ -336,7 +383,7 @@ def organize_crops(dict_area_crops):
 #                     collect info for the permeability
 # ==============================================================================
     
-def collect_data_permeability(permeability_info, consortia, all_info=False):
+def collect_data_permeability(permeability_info, consortia, id_field_consortia, all_info=False):
     """
     collect the database containing the permeability and the type of soil for 
     each consortium
@@ -372,7 +419,7 @@ def collect_data_permeability(permeability_info, consortia, all_info=False):
                                      encoding = 'utf-8', sep = ',')
     
     # control if the file has the right name for the column
-    columns_name = ['DENOMINAZI','AGGREGATO', 'AREA_HA','Ratio_%',
+    columns_name = [id_field_consortia,'Ratio_%',
                         'fk_cuso','fk_dren']
     
     for columns in columns_name :
@@ -383,13 +430,13 @@ def collect_data_permeability(permeability_info, consortia, all_info=False):
             
     # Select the consortium we want 
     if all_info == False :
-        df_permeability = df_permeability[df_permeability['DENOMINAZI'].isin(consortia)]
+        df_permeability = df_permeability[df_permeability[id_field_consortia].isin(consortia)]
     
     
     # # --------------------- organize for the matrice ------------------------
     
     # order the dataframe by the consortium and the permeability and the soil
-    df_permeability = df_permeability.sort_values(by=['DENOMINAZI', 
+    df_permeability = df_permeability.sort_values(by=[id_field_consortia, 
                                                       'fk_cuso','fk_dren'])
     # use the dict_perm to associate each value of dren and cuso with the one 
     # in the matrix of quant 4

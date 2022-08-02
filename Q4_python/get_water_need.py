@@ -2,30 +2,74 @@
 #                              Useful parameters 
 # ------------------------------------------------------------------------------
 
-dict_type_crop  ={
-    '_N_D': 'null',
-    '_N.D.': 'null',
-    'Altra arboricoltura da legno' : 'null',
-    'Altra Superficie' : 'null',
-    'Altre coltivazioni legnose agrarie' : 'null',
-    'Boschi' : 'prato',
-    'Cereali' : 'prato',
-    'Fiori e piante ornamentali' : 'frutteto',
-    'Foraggere avvicendate' : 'prato',
-    'Fruttiferi' : 'frutteto',
-    'Legumi secchi': 'prato',
-    'Olivo': 'mais',
-    'Orti familiari' : 'mais',
-    'Ortive' : 'mais',
-    'Patata' : 'mais',
-    'Piante industriali' : 'mais',
-    'Prati permanenti e pascoli' : 'prato',
-    'Pioppeti': 'mais',
-    'Sementi e Piantine': 'mais',
-    'Terreni a riposo' : 'null',
-    'Vite' : 'null',
-    'Vivai' : 'null'
-    }
+dict_type_crops = {
+ 'ALTRA ARBORICOLTURA DA LEGNO': 'null',
+ 'POMODORO DA MENSA' : 'null' , 
+ 'SOIA': 'null',
+ '_N.D.': 'null', 
+  NULL: 'null',
+ 'ALTRI CEREALI' : 'null',
+ 'ALTRI LEGUMI SECCHI' : 'null',
+ 'FAGIUOLI SECCHI' : 'null',
+ 'GIRASOLE': 'null',
+ 'ALTRA FRUTTA TEMPERATA': 'frutteto',
+ 'PATATA': 'null',
+ 'GRANTURCO A MATURAZIONE CEROSA': 'mais',
+ 'ALTRI PRATI AVVICENDATI': 'prato',
+ 'SEMENTI': 'null', # marcella
+ 'FAVA': 'null', # marcella
+ 'CASTAGNO': 'null', # marcella
+ 'ALTRE ORTIVE IN ORTI STAB. O IND.': 'null',
+ 'PRATI PERMANENTI': 'prato',
+ 'ALBICOCCO': 'frutteto',
+ 'AVENA': 'null', # marcella
+ 'VIVAI,ALTRI': 'null',  # marcella
+ 'ORZO': 'null', 
+ 'VIVAI,PIANTE ORNAMENTALI': 'null', # marcella
+ 'MANDORLO': 'null', # marcella
+ 'PIANTE AROMATICHE, MEDICINALI E COND.': 'null', # marcella
+ 'ALTRA SUPERFICIE': 'null',
+ 'ALTRI ERBAI MONOFITI DI CEREALI': 'prato',
+ 'PERO': 'frutteto', 
+ 'NETTARINA': 'frutteto',
+ 'OLIVO PER OLIO': 'null',
+ 'GRANTURCO IN ERBA': 'mais' ,
+ 'GRANTURCO': 'mais',   
+ 'RISO': 'riso',
+ 'ALTRE PIANTE DA SEMI OLEOSI': 'null',
+ 'MELO': 'frutteto',
+ 'ORTI FAMILIARI': 'null',
+ 'FIORI E PIANTE ORNAMENTALI IN PIENA ARIA': 'null',
+ 'FRUTTA A GUSCIO, ALTRA': 'null',
+ 'LUPPOLO': 'null', # marcella
+ 'NOCE': 'null', # marcella
+ 'ALTRE PIANTE INDUSTRIALI': 'null', # marcella
+ 'ALTRI ERBAI': 'prato',
+ 'SEMI DI LINO': 'null',# marcella
+ 'POMODORO DA INDUSTRIA': 'null',
+ 'OLIVO DA TAVOLA': 'null',
+ 'FRUMENTO TENERO E SPELTA': 'null',
+ 'PESCO': 'frutteto',
+ 'PIOPPETI': 'null', # marcella
+ 'PASCOLI': 'prato',
+ 'ALTRE COLTIVAZIONI LEGNOSE AGRARIE': 'null',# marcella
+ 'CANAPA': 'null', # marcella
+ 'FIORI PROTETTI IN SERRA': 'null',  # marcella
+ 'CILIEGIO': 'frutteto',
+ 'SORGO': 'null',
+ 'FRUMENTO DURO': 'null',
+ 'PISELLO SECCO': 'null',
+ 'TERRENI A RIPOSO, SENZA AIUTO': 'null',
+ 'COLZA E RAVIZZONE': 'prato',
+ 'VITE': 'null', # marcella
+ 'ALTRE ORTIVE DI PIENO CAMPO': 'ORTIVE IN PIENA ARIA',
+ 'ALTRE ORTIVE IN ORTI STAB. O IND.':'ORTIVE IN PIENA ARIA',
+ 'SUSINO': 'frutteto', # marcella
+ 'ERBA MEDICA': 'prato', 
+ 'ACTINIDIA': 'null', # marcella
+ 'NOCCIOLO': 'null', # marcella
+ 'VIVAI, FRUTTIFERI': 'null' # marcella
+ }
 
 dict_month_crop = {
     'mais' : ['mag', 'lug', 'giu', 'ago'],
@@ -106,7 +150,7 @@ def get_list_crops(path, polygone, cadastre, output="cadastre_inter.shp"):
 
 
     # get the list of crops inside the polygone after the intersection with the cadatres
-    idx = cadas_layer.fields().indexOf('cens_liv3')
+    idx = cadas_layer.fields().indexOf('cens_liv4')
     list_crop = list(cadas_layer.uniqueValues(idx))
 
     return list_crop
@@ -218,10 +262,16 @@ def get_single_crop_needs(type_crop, centroids_output, medi, wn):
             wn_layer = QgsVectorLayer(wn_month ,
                                       type_crop + '_'+ name + '_'+  month  + "_wn",
                                       "ogr")
+            # add the vector layer
+            # QgsProject.instance().addMapLayer(wn_layer)
             
             # collect the value of the monthly water need 
             value = wn_layer.getFeature(0)
-            dict_month_wn[month] = value.attribute(5)
+            # get the index where the water need is store in the wn_layer
+            index_wn = len(value.attributes()) -1
+            
+            # add the water need
+            dict_month_wn[month] = value.attribute(index_wn)
         
         # if the month isn't in dict_month crops it means that the crops doesn't 
         # need to be irrigated to the water need is null
@@ -257,17 +307,22 @@ def get_all_crops_needs( list_crop, centroids_output, path):
     # look at all the crop in the polygon
     for crop in list_crop :
         # get the type of crop related to the crop
-        type_crop = dict_type_crop[crop]
+        type_crop = dict_type_crops[crop]
         
         # check if the calcul add already made for the type of crop
         # if not make the compuatation
         if type_crop not in dict_crop_wn_medi.keys():
             
             # check if the type of crop is referenced are not 
-            if type_crop == 'null':
+            if type_crop not in ['fruetteto', 'prato', 'mais']:
                 print('*******************')
-                print('the crop : ' + crop + 'is not associated to prato - frutteto - mais')
-                list_non_reference_crop.append(crop)
+                print('the crop : ' + crop + ' is not associated to prato - frutteto - mais')
+                
+                if type_crop == 'null':
+                    list_non_reference_crop.append(crop)
+                else :
+                    list_non_reference_crop.append(type_crop)
+                    
             # if is reference hget the water related to the centroids and the type of crop
             else :
                 # folder where the shapefile corresponding to the water need of the centroids will be store

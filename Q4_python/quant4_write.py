@@ -1,4 +1,9 @@
-print(before lauching the program, you have to lauch, get_consortia_info_v2.py, get_water_need.py, Tool_function.py,coltura_reference.py, excel_writting.py)
+print('before lauching the program, you have to lauch :')
+print(' - get_consortia_info_v2.py')
+print(' - get_water_need.py')
+print(' - Tool_function.py')
+print(' - coltura_reference.py')
+print(' - excel_writting.py')
 # ==============================================================================
 #                                  Input of the program
 # ==============================================================================
@@ -12,8 +17,10 @@ result_folder = "C://Users/clemo/Documents/Italie/Studio PD/QGIS/Results/"      
 #            Consortia
 # --------------------------------- 
 consortia_path = "C://Users/clemo/Documents/Italie/Studio PD/QGIS/info/consortia/"     #"""  write """
-consortia_name_file = "CI_CORVA_SINISTRA.shp"                                          #"""  write """
+consortia_name_file = "AREA_BORCA_1.shp"                                               #"""  write """
 consortia_file = consortia_path + consortia_name_file
+
+id_field_consortia = 'DENOMINAZI'                                                      #"""  write """
 
 # consortia layer and plot
 consortia_layer = QgsVectorLayer(consortia_file, "Consortia", "ogr")
@@ -24,7 +31,7 @@ consortia_max_area_authorized = 10000  #in Ha                                   
 is_area_valid(consortia_layer, consortia_max_area_authorized)
 
 # get the name of the consortia
-idx = consortia_layer.fields().indexOf('DENOMINAZI')
+idx = consortia_layer.fields().indexOf(id_field_consortia)
 list_consortia = list(consortia_layer.uniqueValues(idx))
 
 
@@ -57,7 +64,7 @@ name = "C:/Users/clemo/Documents/Italie/Studio PD/QGIS/Quant4/quant4_vers_4_2_xl
 Inizio = '01/04'                                                                                 #"""  write """
 Terminea = '30/09'                                                                               #"""  write """
 Ex_write = Excel_write(name,  
-                       list_consortia[0],
+                       str(list_consortia[0]),
                        6.064,
                        Inizio,
                        Terminea)
@@ -84,7 +91,7 @@ Ex_write.add_composizione_irrigua_aziendale(canali_terra_az,
 # ---------------------------------
 #     Coltura reference data base 
 # ---------------------------------
-name = "C:/Users/clemo/Documents/Italie/Studio PD/QGIS/Quant4/Coltura_reference.xlsx"           #"""  write """
+name = "C:/Users/clemo/Documents/Italie/Studio PD/QGIS/Quant4/Coltura_data_base.xlsx"           #"""  write """
 Excel_coltura = Excel_reference_coltura(name)
 
 
@@ -155,7 +162,8 @@ consortia = list_consortia[0]
 dict_coltura, dict_perma  = collect_information_consortium(result_folder,
                                                            cadastre_layer,
                                                            permea_layer,
-                                                           list_consortia)
+                                                           list_consortia,
+                                                           id_field_consortia,)
 
 # ------------------- 
 #    monthly water need 

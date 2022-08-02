@@ -5,7 +5,7 @@
 dict_type_crops = {
  'ACTINIDIA': 'null', # marcella
  'ALBICOCCO': 'frutteto',
- 'ALTRA ARBORICOLTURA DA LEGNO': 'null', 
+ 'ALTRA ARBORICOLTURA DA LEGNO': 'ALTRE COLTIVAZIONI LEGNOSES AGRARIE', 
  'ALTRA FRUTTA TEMPERATA': 'frutteto',
  'ALTRA SUPERFICIE': 'null',
  'ALTRE COLTIVAZIONI LEGNOSE AGRARIE': 'null',# marcella
@@ -40,7 +40,7 @@ dict_type_crops = {
  'MELO': 'frutteto',
  'NETTARINA': 'frutteto',
  'NOCE': 'null', # marcella
- 'NOCCIOLO': 'null', # marcella
+ 'NOCCIOLO': 'ALTRE COLTIVAZIONI LEGNOSES AGRARIE', # marcella
   NULL: 'null',
  '_N.D.': 'null',
  'OLIVO DA TAVOLA': 'null',
@@ -68,7 +68,6 @@ dict_type_crops = {
  'VIVAI,PIANTE ORNAMENTALI': 'null', # marcella 
  'VIVAI, FRUTTIFERI': 'null' # marcella
  }
-
 dict_month_crop = {
     'mais' : ['mag', 'lug', 'giu', 'ago'],
     'frutteto' : ['apr', 'mag', 'lug', 'giu', 'ago', 'set'],    

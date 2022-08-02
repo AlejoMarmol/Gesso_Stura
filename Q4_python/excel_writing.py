@@ -111,6 +111,22 @@ dict_coordinate = {
                   'lug' : [426,8] ,#I427
                   'ago' : [426,9] ,#J427
                   'set' : [426,10] #K427
+                  },   
+             'FN parcellari della coltura di valore medio' : 
+                 {'apr' : [427,5] ,#F428
+                  'mag' : [427,6] ,#G428
+                  'giu' : [427,7] ,#H428
+                  'lug' : [427,8] ,#I428
+                  'ago' : [427,9] ,#J428
+                  'set' : [427,10] #K428
+                  }, 
+             'FN parcellari della coltura con freq, sup 20' : 
+                 {'apr' : [428,5] ,#F429
+                  'mag' : [428,6] ,#G429
+                  'giu' : [428,7] ,#H429
+                  'lug' : [428,8] ,#I429
+                  'ago' : [428,9] ,#J429
+                  'set' : [428,10] #K429
                   }                 
               }
             } 
@@ -209,11 +225,12 @@ class Excel_write():
                          dict_coordinate['Terminea'][1],
                          Terminea)
         
-#        self.workbook.save(self.name)
+
         # -----------------------------------------
         #  Create the dict which has all the info 
-        self.dict_coordinate = dict_coordinate
-        self.dict_irrig_date = dict_irrig_date
+        self.dict_coordinate    = dict_coordinate
+        self.dict_irrig_date    = dict_irrig_date
+        self.dict_irrig_methodo = dict_irrig_methodo
         
         # -------------------------------------------------------
         # Create identification line for all the similiar input 
@@ -406,8 +423,10 @@ class Excel_write():
                  
                  # increment the row to add the next coltura 
                  self.coltura_irrigate_row += 1
+    
+    
     # ==========================================================================
-    def add_fabbisogni_netti_20(self, dict_Fabbisogni):
+    def add_fabbisogni_netti_20(self, coltura, dict_coltura_Fabbisogni_20):
         """
         add teh water need for the cultura, the one with 20% of rain
         
@@ -424,24 +443,37 @@ class Excel_write():
             raise(ValueError('Not enough place for coltura in Fabbisogni netti parcellari di netti 20%'))
             return 
         
-        for coltura in dict_Fabbisogni.keys() :
-            # add the coltura
+        
+        # add the coltura
+        self.sheet.write(self.fabbisogni_netti_20_row,
+                         self.dict_coordinate['Fabbisogni netti parcellari con frequenza di superamento 20% (altezze mensili)']['coltura'][1],
+                         coltura)  
+                         
+        # add the methodo irriguo
+        if coltura in self.dict_irrig_methodo : 
             self.sheet.write(self.fabbisogni_netti_20_row,
-                             self.dict_coordinate['Fabbisogni netti parcellari con frequenza di superamento 20% (altezze mensili)']['coltura'][1],
-                             coltura)  
-      
-            # add the water need for each month
-            for month in dict_Fabbisogni[coltura].keys():
-                self.sheet.write(self.fabbisogni_netti_20_row,
-                                 self.dict_coordinate['Fabbisogni netti parcellari con frequenza di superamento 20% (altezze mensili)'][month][1],
-                                 dict_Fabbisogni[coltura][month])     
-             
-            # increment the row to add the next coltura 
-            self.fabbisogni_netti_20_row += 1
+                             self.dict_coordinate['Colture irrigate']['Metodo irriguo'][1],
+                             dict_irrig_methodo[coltura]) 
+                             
+        else :
+            # the value by default of the irrigation method is scorrimento
+            self.sheet.write(self.fabbisogni_netti_20_row,
+                             self.dict_coordinate['Colture irrigate']['Metodo irriguo'][1],
+                             'scorrimento') 
+        
+  
+        # add the water need for each month
+        for month in dict_coltura_Fabbisogni_20.keys():
+            self.sheet.write(self.fabbisogni_netti_20_row,
+                             self.dict_coordinate['Fabbisogni netti parcellari con frequenza di superamento 20% (altezze mensili)'][month][1],
+                             dict_coltura_Fabbisogni_20[month])     
+         
+        # increment the row to add the next coltura 
+        self.fabbisogni_netti_20_row += 1
         return
 
     # ==========================================================================
-    def add_fabbisogni_netti_medi(self, dict_Fabbisogni):
+    def add_fabbisogni_netti_medi(self, coltura, dict_coltura_Fabbisogni_medi):
         """
         add teh water need for the cultura, the one with medi of rain
         
@@ -465,34 +497,69 @@ class Excel_write():
             raise(ValueError('Not enough place for coltura in Fabbisogni netti parcellari di valore medio'))
             return 
         
-        for coltura in dict_Fabbisogni.keys() :
-            # add the coltura
-            self.sheet.write(self.fabbisogni_netti_medio_row,
-                             self.dict_coordinate['Fabbisogni netti parcellari di valore medio']['coltura'][1],
-                             coltura)  
-            # add the methodo irriguo
+        # add the coltura
+        self.sheet.write(self.fabbisogni_netti_medio_row,
+                         self.dict_coordinate['Fabbisogni netti parcellari di valore medio']['coltura'][1],
+                         coltura)
+                         
+        # add the methodo irriguo
+        if coltura in self.dict_irrig_methodo : 
             self.sheet.write(self.fabbisogni_netti_medio_row,
                              self.dict_coordinate['Colture irrigate']['Metodo irriguo'][1],
                              dict_irrig_methodo[coltura]) 
-      
-            # add the water need for each month
-            for month in dict_Fabbisogni[coltura].keys():
-                self.sheet.write(self.fabbisogni_netti_medio_row,
-                                 self.dict_coordinate['Fabbisogni netti parcellari di valore medio'][month][1],
-                                 dict_Fabbisogni[coltura][month])     
-             
-            # increment the row to add the next coltura 
-            self.fabbisogni_netti_medio_row += 1
+                             
+        else :
+            print('****************************')
+            print( 'the coltura : '+coltura+' does not have a method of')
+            print('irriguo reference in dict_irrig_methodo,in the file')
+            print(' : excel_writing.py the value by default will be :')
+            print(' **scorrimento** ')
+            print(' ')
+            self.sheet.write(self.fabbisogni_netti_medio_row,
+                            self.dict_coordinate['Colture irrigate']['Metodo irriguo'][1],
+                            'scorrimento')
+  
+        # add the water need for each month
+        for month in dict_coltura_Fabbisogni_medi.keys():
+            self.sheet.write(self.fabbisogni_netti_medio_row,
+                             self.dict_coordinate['Fabbisogni netti parcellari di valore medio'][month][1],
+                             dict_coltura_Fabbisogni_medi[month])     
+         
+        # increment the row to add the next coltura 
+        self.fabbisogni_netti_medio_row += 1
         return
 
     # ==========================================================================
+    def add_new_coltura_fabisiogni(self, coltura_name, dict_new_coltura):
+        """
+        add fabisiogni neti medi and 20% of a non reference coltura
+        non reference coltura means, it doesn't associated to prato, mais or 
+        fruttteto
+        ------------         
+        Parameters
+       
+        coltura_name : string
+            name of the new coltura we want
+        
+        dict_coltura_fabisiogni : dictionnary
+            key_1 : fabisogni neti medi or fabisiogni neti 20%
+            key_2 : month 
+            value : value of the coefficient for the month 
+        """
+        self.add_fabbisogni_netti_medi(coltura_name, 
+                                       dict_new_coltura['FN parcellari della coltura di valore medio'])
+        self.add_fabbisogni_netti_20(coltura_name, 
+                                       dict_new_coltura['FN parcellari della coltura con freq, sup 20'])
+            
+        
+        
+    # ==========================================================================
     def add_new_coltura(self, coltura_name, dict_new_coltura):
         """
-        add a new coltura inside the excel file
+        add a non reference coltura inside the excel file
         
         ------------
         Parameters
-        ------------
         coltura_name : string
             name of the new coltura we want
         
@@ -523,13 +590,19 @@ class Excel_write():
                     self.sheet.write(self.new_coltura_row,
                                      self.dict_coordinate['Coltura'][type][month][1],
                                      dict_new_coltura[type][month]) 
-                                     
+                
                 # go to the next ligne of value
                 self.new_coltura_row = 1 + self.new_coltura_row
             # go to the next coltura
-            self.new_coltura_row = 4 + self.new_coltura_row 
-        
+            self.new_coltura_row = 2 + self.new_coltura_row 
+            
+            # add the value of fabisiogni netti medi and 20% with the similar 
+            # of prato mais and frutteto
+            self.add_new_coltura_fabisiogni(coltura_name, dict_new_coltura)
+            
         return
+        
+        
     # ========================================================================== 
     def add_irrigation_period_coltura(self, coltura, dict_month):
         """

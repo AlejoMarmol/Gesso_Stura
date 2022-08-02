@@ -35,7 +35,7 @@ dict_perma_matrix  = {('Bassa','1-2'): 0 , ('Media','1-2'): 0 , ('Alta','1-2'): 
 dict_type_crops = {
  'ACTINIDIA': 'null', # marcella
  'ALBICOCCO': 'frutteto',
- 'ALTRA ARBORICOLTURA DA LEGNO': 'null', 
+ 'ALTRA ARBORICOLTURA DA LEGNO': 'ALTRE COLTIVAZIONI LEGNOSES AGRARIE', 
  'ALTRA FRUTTA TEMPERATA': 'frutteto',
  'ALTRA SUPERFICIE': 'null',
  'ALTRE COLTIVAZIONI LEGNOSE AGRARIE': 'null',# marcella
@@ -70,7 +70,7 @@ dict_type_crops = {
  'MELO': 'frutteto',
  'NETTARINA': 'frutteto',
  'NOCE': 'null', # marcella
- 'NOCCIOLO': 'null', # marcella
+ 'NOCCIOLO': 'ALTRE COLTIVAZIONI LEGNOSES AGRARIE', # marcella
   NULL: 'null',
  '_N.D.': 'null',
  'OLIVO DA TAVOLA': 'null',

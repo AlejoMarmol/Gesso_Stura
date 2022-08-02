@@ -207,8 +207,9 @@ Ex_write.add_permeability_matrix(dict_perma[consortia])
 # ------------------- 
 #    Water need
 # --------------------
-Ex_write.add_fabbisogni_netti_medi(dict_Fabbisogni_50)
-Ex_write.add_fabbisogni_netti_20(dict_Fabbisogni_20)
+for coltura in dict_Fabbisogni_50.keys():
+    Ex_write.add_fabbisogni_netti_medi(coltura, dict_Fabbisogni_50[coltura])
+    Ex_write.add_fabbisogni_netti_20(  coltura, dict_Fabbisogni_20[coltura])
 
 print('************************')
 print('Info written')

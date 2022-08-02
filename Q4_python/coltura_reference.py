@@ -44,9 +44,22 @@ dict_coordinate_crops = {
                                                                   'lug': [5,7],  #H6
                                                                   'ago': [5,8],  #I6
                                                                   'set': [5,9],  #J6
+                                                                 },
+                        'FN parcellari della coltura di valore medio' :{'apr': [6,4],  #E7
+                                                          'mag': [6,5],  #F7
+                                                          'giu': [6,6],  #G7
+                                                          'lug': [6,7],  #H7
+                                                          'ago': [6,8],  #I7
+                                                          'set': [6,9],  #J7
+                                                         }     ,                            
+                        'FN parcellari della coltura con freq, sup 20' :{'apr': [7,4],  #E8
+                                                                  'mag': [7,5],  #F8
+                                                                  'giu': [7,6],  #G8
+                                                                  'lug': [7,7],  #H8
+                                                                  'ago': [7,8],  #I8
+                                                                  'set': [7,9],  #J8
                                                                  } 
-                        }
-
+                        } 
 # %% ===========================================================================
 #                              Tool function
 # ==============================================================================
@@ -64,6 +77,10 @@ class Excel_reference_coltura():
         # -----------------------------------------
         #  Create the dict which has all the info 
         self.dict_coordinate = dict_coordinate_crops        
+
+        # -----------------------------------------        
+        # Collect the list of referenced crops 
+        self.dict_coltura_reference = self.get_reference_coltura()
         
         
     # ==========================================================================
@@ -144,8 +161,8 @@ class Excel_reference_coltura():
 
     
         return dict_info_coltura
+        
     # ==========================================================================
-    
     def collect_all_information(self, list_non_reference_crop):
         """
         collect the info of a reference crop
@@ -166,14 +183,12 @@ class Excel_reference_coltura():
         """
         dict_info_coltura = {}
         
-        # collect the list of referenced crops 
-        dict_coltura_reference = self.get_reference_coltura()
-        
         for crop in list_non_reference_crop :
             
             # test if the dop is referencec
-            if crop in dict_coltura_reference.keys() :
-                dict_info_coltura[crop] = self.get_info_coltura(crop, dict_coltura_reference[crop])
+            if crop in self.dict_coltura_reference.keys() :
+                dict_info_coltura[crop] = self.get_info_coltura(crop,
+                                                                self.dict_coltura_reference[crop])
                 
             
             else :
@@ -181,9 +196,9 @@ class Excel_reference_coltura():
                     raise(ValueError('The crop : '+ crop + ' is not referenced in the file : ' + self.name + '.Please either add in the excel file or in non desired crop dictionnary.'))
          
         return dict_info_coltura 
+
+
         
-
-
 # %% ===========================================================================
 #                              Writting test
 # ==============================================================================    
@@ -193,14 +208,13 @@ name = "C:/Users/clemo/Documents/Italie/Studio PD/QGIS/Quant4/Coltura_reference.
 
 Excel_coltura = Excel_reference_coltura(name)
 
-dict_coltura_reference = Excel_coltura.get_reference_coltura()
+dict_coltura_reference = Excel_coltura.dict_coltura_reference
 
 dict_info_coltura = Excel_coltura.get_info_coltura('Ortive in piena aria',
                                                     dict_coltura_reference['Ortive in piena aria'])
 
 results = Excel_coltura.collect_all_information(['Ortive in piena aria'])
+
 """
-    
-    
     
     

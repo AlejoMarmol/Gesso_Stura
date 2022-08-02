@@ -33,71 +33,69 @@ dict_perma_matrix  = {('Bassa','1-2'): 0 , ('Media','1-2'): 0 , ('Alta','1-2'): 
 
 # associate each type of crops with the type of crops desired in quant 4 
 dict_type_crops = {
- 'ALTRA ARBORICOLTURA DA LEGNO': 'null',
- 'POMODORO DA MENSA' : 'null' , 
- 'SOIA': 'null',
- '_N.D.': 'null', 
-  NULL: 'null',
- 'ALTRI CEREALI' : 'null',
- 'ALTRI LEGUMI SECCHI' : 'null',
- 'FAGIUOLI SECCHI' : 'null',
- 'GIRASOLE': 'null',
- 'ALTRA FRUTTA TEMPERATA': 'frutteto',
- 'PATATA': 'null',
- 'GRANTURCO A MATURAZIONE CEROSA': 'mais',
- 'ALTRI PRATI AVVICENDATI': 'prato',
- 'SEMENTI': 'null', # marcella
- 'FAVA': 'null', # marcella
- 'CASTAGNO': 'null', # marcella
- 'ALTRE ORTIVE IN ORTI STAB. O IND.': 'null',
- 'PRATI PERMANENTI': 'prato',
+ 'ACTINIDIA': 'null', # marcella
  'ALBICOCCO': 'frutteto',
- 'AVENA': 'null', # marcella
- 'VIVAI,ALTRI': 'null',  # marcella
- 'ORZO': 'null', 
- 'VIVAI,PIANTE ORNAMENTALI': 'null', # marcella
- 'MANDORLO': 'null', # marcella
- 'PIANTE AROMATICHE, MEDICINALI E COND.': 'null', # marcella
+ 'ALTRA ARBORICOLTURA DA LEGNO': 'null', 
+ 'ALTRA FRUTTA TEMPERATA': 'frutteto',
  'ALTRA SUPERFICIE': 'null',
- 'ALTRI ERBAI MONOFITI DI CEREALI': 'prato',
- 'PERO': 'frutteto', 
- 'NETTARINA': 'frutteto',
- 'OLIVO PER OLIO': 'null',
- 'GRANTURCO IN ERBA': 'mais' ,
- 'GRANTURCO': 'mais',   
- 'RISO': 'riso',
- 'ALTRE PIANTE DA SEMI OLEOSI': 'null',
- 'MELO': 'frutteto',
- 'ORTI FAMILIARI': 'null',
- 'FIORI E PIANTE ORNAMENTALI IN PIENA ARIA': 'null',
- 'FRUTTA A GUSCIO, ALTRA': 'null',
- 'LUPPOLO': 'null', # marcella
- 'NOCE': 'null', # marcella
- 'ALTRE PIANTE INDUSTRIALI': 'null', # marcella
- 'ALTRI ERBAI': 'prato',
- 'SEMI DI LINO': 'null',# marcella
- 'POMODORO DA INDUSTRIA': 'null',
- 'OLIVO DA TAVOLA': 'null',
- 'FRUMENTO TENERO E SPELTA': 'null',
- 'PESCO': 'frutteto',
- 'PIOPPETI': 'null', # marcella
- 'PASCOLI': 'prato',
  'ALTRE COLTIVAZIONI LEGNOSE AGRARIE': 'null',# marcella
- 'CANAPA': 'null', # marcella
- 'FIORI PROTETTI IN SERRA': 'null',  # marcella
- 'CILIEGIO': 'frutteto',
- 'SORGO': 'null',
- 'FRUMENTO DURO': 'null',
- 'PISELLO SECCO': 'null',
- 'TERRENI A RIPOSO, SENZA AIUTO': 'null',
- 'COLZA E RAVIZZONE': 'prato',
- 'VITE': 'null', # marcella
  'ALTRE ORTIVE DI PIENO CAMPO': 'ORTIVE IN PIENA ARIA',
  'ALTRE ORTIVE IN ORTI STAB. O IND.':'ORTIVE IN PIENA ARIA',
- 'SUSINO': 'frutteto', # marcella
+ 'ALTRE PIANTE DA SEMI OLEOSI': 'null',
+ 'ALTRE PIANTE INDUSTRIALI': 'null', # marcella
+ 'ALTRI CEREALI' : 'null',
+ 'ALTRI ERBAI': 'prato',
+ 'ALTRI ERBAI MONOFITI DI CEREALI': 'prato',
+ 'ALTRI LEGUMI SECCHI' : 'null', 
+ 'ALTRI PRATI AVVICENDATI': 'prato',
+ 'AVENA': 'null', # marcella
+ 'CANAPA': 'null', # marcella
+ 'CASTAGNO': 'null', # marcella
+ 'CILIEGIO': 'frutteto',
+ 'COLZA E RAVIZZONE': 'prato',
  'ERBA MEDICA': 'prato', 
- 'ACTINIDIA': 'null', # marcella
+ 'FAGIUOLI SECCHI' : 'null',
+ 'FAVA': 'null', # marcella
+ 'FIORI E PIANTE ORNAMENTALI IN PIENA ARIA': 'null',
+ 'FIORI PROTETTI IN SERRA': 'null',  # marcella
+ 'FRUMENTO DURO': 'null',
+ 'FRUMENTO TENERO E SPELTA': 'null',
+ 'FRUTTA A GUSCIO, ALTRA': 'null',
+ 'GIRASOLE': 'null',
+ 'GRANTURCO A MATURAZIONE CEROSA': 'mais',
+ 'GRANTURCO IN ERBA': 'mais' ,
+ 'GRANTURCO': 'mais',  
+ 'LUPPOLO': 'null', # marcella
+ 'MANDORLO': 'null', # marcella
+ 'MELO': 'frutteto',
+ 'NETTARINA': 'frutteto',
+ 'NOCE': 'null', # marcella
  'NOCCIOLO': 'null', # marcella
+  NULL: 'null',
+ '_N.D.': 'null',
+ 'OLIVO DA TAVOLA': 'null',
+ 'OLIVO PER OLIO': 'null',
+ 'ORTI FAMILIARI': 'null', 
+ 'ORZO': 'null',
+ 'PASCOLI': 'prato',
+ 'PATATA': 'null',
+ 'PERO': 'frutteto', 
+ 'PIANTE AROMATICHE, MEDICINALI E COND.': 'null', # marcella
+ 'PIOPPETI': 'null', # marcella
+ 'PISELLO SECCO': 'null',
+ 'POMODORO DA INDUSTRIA': 'null',
+ 'POMODORO DA MENSA' : 'null' , 
+ 'PRATI PERMANENTI': 'prato',
+ 'RISO': 'riso',
+ 'SEMENTI': 'null', # marcella
+ 'SEMI DI LINO': 'null',# marcella
+ 'SORGO': 'null',
+ 'SUSINO': 'frutteto', # marcella
+ 'TERRENI A RIPOSO, SENZA AIUTO': 'null',
+ 'SOIA': 'null',
+ 'VITE': 'null', # marcella
+ 'VIVAI,ALTRI': 'null',  # marcella 
+ 'VIVAI,PIANTE ORNAMENTALI': 'null', # marcella 
  'VIVAI, FRUTTIFERI': 'null' # marcella
  }
 # %% =========================================================================

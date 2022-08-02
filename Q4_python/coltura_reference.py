@@ -11,7 +11,7 @@ list_non_desired_crop = ['ORZO','_N.D.','NULL',
                          'ALTRA SUPERFICIE',
                          'FRUMENTO DURO',
                          'TERRENI A RIPOSO, SENZA AIUTO',
-                         'NOCCIOLO']
+                         'ORTI FAMILIARI']
 
 
 
@@ -178,7 +178,7 @@ class Excel_reference_coltura():
             
             else :
                 if crop not in  list_non_desired_crop : 
-                    raise(ValueError('The crop : '+ crop + ' is not referenced in the file : ' + self.name + '.Please either add in the excel file.'))
+                    raise(ValueError('The crop : '+ crop + ' is not referenced in the file : ' + self.name + '.Please either add in the excel file or in non desired crop dictionnary.'))
          
         return dict_info_coltura 
         

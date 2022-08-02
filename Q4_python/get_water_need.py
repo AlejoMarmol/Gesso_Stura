@@ -327,7 +327,7 @@ def get_all_crops_needs( list_crop, centroids_output, path):
                 wn   =  path + "Water_need/"
                 
                # folder where the raster water need medi are stored 
-                medi = path + "F_medi_originali/"
+                medi = path + "FN_medi_originali/"
                 dict_crop_wn_medi[type_crop]= get_single_crop_needs(type_crop, 
                                                                     centroids_output,
                                                                     medi, 

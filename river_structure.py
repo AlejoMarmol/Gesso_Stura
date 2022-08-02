@@ -225,8 +225,9 @@ class Node():
             contains all th caractéristique related to the node : 
                 columns : 'Nome', 'Q', 'Tipo','Etichetta'
         """
-        self.confluence = confluence
         self.number = number
+        self.confluence = confluence
+        
         self.list_flow_name = df_node['Nome'].unique().tolist()
         self.list_flow_tipo = df_node['Tipo'].unique().tolist()
         self.list_flow = []
@@ -555,11 +556,11 @@ if __name__ == '__main__':
     section_0_1.calculate_section_flow()
     #---------------------
     # Test the river class
-#    print('***********')
-#    print(' Test Section class')
-#    
-#    df_river =  df_gesso
-#    river_g = River(river_gesso, df_gesso, df_node)
+    print('***********')
+    print(' Test Section class')
+    
+    df_river =  df_gesso
+    river_g = River(river_gesso, df_gesso, df_node)
     
     
     #---------------------

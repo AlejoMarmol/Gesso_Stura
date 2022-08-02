@@ -8,9 +8,10 @@ Created on Wed Apr 27 10:34:31 2022
 import pandas as pd
 
 # cvs file
-input_consortium = "C://Users/clemo/Documents/Italie/Studio PD/QGIS/consortia/consorzi/consorzi_split_by_comuni.csv"
-input_municipality = "C://Users/clemo/Documents/Italie/Studio PD/QGIS/Agriculture-info/sasExportX14X.csv"
-input_permeability = "C://Users/clemo/Documents/Italie/Studio PD/QGIS/permeability/capacita_uso_suoli_con_drenaggio_con_consorzi.csv"
+input_consortium = "C://Users/clemo/Documents/Italie/Studio PD/QGIS/info/consortia/consorzi/consorzi_split_by_comuni.csv"
+input_municipality = "C://Users/clemo/Documents/Italie/Studio PD/QGIS/info/Agriculture-info/sasExportX14X.csv"
+input_permeability = "C://Users/clemo/Documents/Italie/Studio PD/QGIS/info/permeability/capacita_uso_suoli_con_drenaggio_con_consorzi.csv"
+input_cadastre = "C://Users/clemo/Documents/Italie/Studio PD/QGIS/info/cadastre/Intersection_uso_suolo_agri_consorzi_web.csv"
 
 # ratio of urbanization and canali inside qgis
 Perc_urbanizzazione = 2.0
@@ -61,7 +62,9 @@ def collect_all_information():
     consortia = []
     return(collect_information_consortium(consortia, True))
     
-    
+# %% =========================================================================
+# collect info consorzi
+# ============================================================================   
 def collect_information_consortium(consortia, all_info=False):
     """
     Collect the information concerning all the municpalities related to 
@@ -102,7 +105,6 @@ def collect_information_consortium(consortia, all_info=False):
     if not all_info  : 
         if type(consortia) is not list :
             consortia = [consortia]
-        print(consortia)
     
         
     # # -------------------- Collect the data for crops------------------------   
@@ -181,7 +183,10 @@ def collect_information_consortium(consortia, all_info=False):
     
     return(dict_crops, dict_consor_matrix, dict_superficy)
     
-    
+ 
+# %% =========================================================================
+# Collect all the data
+# ============================================================================
     
          
 def intersection_consortium_comuni(consortia, all_info=False):
@@ -259,7 +264,8 @@ def intersection_consortium_comuni(consortia, all_info=False):
 
     return(df_consor_n_comuni)
     
-    
+
+
     
     
 def collect_data_crops_comuni(list_comuni, all_info=False):
@@ -339,6 +345,34 @@ def collect_data_crops_comuni(list_comuni, all_info=False):
     return(df_comuni)
 
 
+
+def intersection_cadastre_consorzi(consortia, all_info=False):
+    """
+    find  all the municipalities related to the consortium and check if the 
+    columns from the intersection between comuni and consortium have the right 
+    name
+        
+    Parameters local : 
+    ----------------------
+    consortia : list
+        liste with the name of the consortium
+        
+    all_info : booléen
+        booléen which contains the information, do we want to extract the 
+        information for all consortia
+        
+
+    """
+    # # ------------------------- Collect the data ----------------------------    
+    df_consor_n_cada = pd.read_csv(input_cadastre,
+                                     encoding = 'utf-8', sep = ',')
+          
+    # Select the consortium we want 
+    if all_info == False : 
+        df_consor_n_cada  = df_consor_n_cada [df_consor_n_cada ['DENOMINAZI'].isin(consortia)]
+
+
+    return(df_consor_n_cada)
 
 
 def collect_data_permeability(consortia, all_info=False):

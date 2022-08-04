@@ -509,8 +509,8 @@ class Excel_write():
                              dict_irrig_methodo[coltura]) 
                              
         else :
-            print('****************************')
-            print( 'the coltura : '+coltura+' does not have a method of')
+            print('************************')
+            print( 'the coltura : '+ coltura +' does not have a method of')
             print('irriguo reference in dict_irrig_methodo,in the file')
             print(' : excel_writing.py the value by default will be :')
             print(' **scorrimento** ')

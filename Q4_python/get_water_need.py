@@ -311,14 +311,15 @@ def get_all_crops_needs( list_crop, centroids_output, path):
         if type_crop not in dict_crop_wn_medi.keys():
             
             # check if the type of crop is referenced are not 
-            if type_crop not in ['fruetteto', 'prato', 'mais']:
-                print('*******************')
-                print('the crop : ' + crop + ' is not associated to prato - frutteto - mais')
+            if type_crop not in ['fruetteto', 'prato', 'mais','rizo']:
+                print('************************')
                 
                 if type_crop == 'null':
                     list_non_reference_crop.append(crop)
+                    print('the crop : ' + crop + ' is associated to :' + crop  + ' in the quant 4 ')
                 else :
                     list_non_reference_crop.append(type_crop)
+                    print('the crop : ' + crop + ' is associated to :' + type_crop + ' in the quant 4 ')
                     
             # if is reference hget the water related to the centroids and the type of crop
             else :

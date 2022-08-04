@@ -299,7 +299,7 @@ def collect_information_consortium(path, layer_cadastre, layer_permeability, con
       
     
     
-    return(dict_crops, dict_matrix_consor,df_consor_crop)
+    return(dict_crops, dict_matrix_consor)
  
 # %% ===========================================================================
 #                               collect info for the crops
@@ -331,7 +331,6 @@ def intersection_cadastre_consorzi(cadastre_info, consortia, id_field_consortia,
     df_consor_n_cada = pd.read_csv(cadastre_info,
                                      encoding = 'utf-8', sep = ',')
     
-    print(consortia)
     # do we want all the consortium ? 
     if all_info == False :
         df_consor_n_cada = df_consor_n_cada[df_consor_n_cada[id_field_consortia].isin(consortia)]

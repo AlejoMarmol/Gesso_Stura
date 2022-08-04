@@ -280,7 +280,7 @@ def collect_information_consortium(path, layer_cadastre, layer_permeability, con
         df_consor_crop = df_consor_n_cada[(df_consor_n_cada.DENOMINAZI == consortium)]
         
 
-        df_sum_crop = df_consor_crop.groupby(by = ['cens_liv4']).sum()/10000 # 100000 conversion meters Ha
+        df_sum_crop = df_consor_crop.groupby(by = ['cens_liv4']).sum() # 100000 conversion meters Ha
         dict_crops_consor = df_sum_crop['Area_part'].to_dict()
         
         # organize crops 

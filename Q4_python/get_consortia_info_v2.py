@@ -7,6 +7,17 @@ import pandas as pd
 import os # This is is needed in the pyqgis console also
 from qgis.core import *
 
+print('')
+print('-------------')
+print(' Before using the Quant 4 make sure you have classify your crops')
+print('-------------')
+print('In the dictionnary  dict_type_crops in get_consortia_v2.py and  get_water_need.py')
+print('check if the crops you are gonna used are written as key.')
+print('')
+print('Then make sur they are either related to frutteto-prato-mais-rizo or they are related to a crop written in the excel file coltura_data_base')
+print('-------------')
+print('Finally check if the type of crops that you are gonna used does not exceed 5')
+print('-------------')
 
 # cvs file
 # input_permeability = "C://Users/clemo/Documents/Italie/Studio PD/QGIS/info/permeability/capacita_uso_suoli_con_drenaggio_con_consorzi.csv"

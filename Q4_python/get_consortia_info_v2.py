@@ -279,8 +279,9 @@ def collect_information_consortium(path, layer_cadastre, layer_permeability, con
         # #for the crops and superficy
         df_consor_crop = df_consor_n_cada[(df_consor_n_cada.DENOMINAZI == consortium)]
         
+
         df_sum_crop = df_consor_crop.groupby(by = ['cens_liv4']).sum()/10000 # 100000 conversion meters Ha
-        dict_crops_consor = df_sum_crop['particella'].to_dict()
+        dict_crops_consor = df_sum_crop['Area_part'].to_dict()
         
         # organize crops 
         dict_crops[consortium] = organize_crops(dict_crops_consor)
@@ -298,7 +299,7 @@ def collect_information_consortium(path, layer_cadastre, layer_permeability, con
       
     
     
-    return(dict_crops, dict_matrix_consor)
+    return(dict_crops, dict_matrix_consor,df_consor_crop)
  
 # %% ===========================================================================
 #                               collect info for the crops

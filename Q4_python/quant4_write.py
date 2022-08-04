@@ -107,8 +107,15 @@ output_cadastre = intersection(consortia_file,
                                cadastre_file,
                                result_folder + cadastre_in_consortia)
                                
-# plot the layer                                 
+# the layer                                 
 cadastre_layer = QgsVectorLayer(output_cadastre, "Cadastre", "ogr")
+
+# calculate the area of each particella 
+name_field = 'Area_part'
+expression = '$area/10000'
+add_field(cadastre_layer, name_field, expression)
+
+# plot the layer 
 QgsProject.instance().addMapLayer(cadastre_layer)
 
 # time 
@@ -124,15 +131,16 @@ output_permeability = intersection(consortia_file,
                                    permeability_file, 
                                    result_folder + permeability_in_consortia)
   
-# plot the layer  
+# the layer  
 permea_layer = QgsVectorLayer(output_permeability, "Permeability", "ogr")
-QgsProject.instance().addMapLayer(permea_layer)
 
 # calculate the ratio of type of soil on area of the consortia
 name_field = "Ratio_%"
-expression = '$area/"AREA_HA"/10000'
+expression = '$area/"AREA"/10000'
 add_field(permea_layer, name_field, expression)
 
+# plot the layer 
+QgsProject.instance().addMapLayer(permea_layer)
 # time 
 print('************************')
 print('Permeability file created ')
@@ -163,7 +171,7 @@ dict_coltura, dict_perma  = collect_information_consortium(result_folder,
                                                            cadastre_layer,
                                                            permea_layer,
                                                            list_consortia,
-                                                           id_field_consortia,)
+                                                           id_field_consortia)
 
 # ------------------- 
 #    monthly water need 
@@ -196,7 +204,16 @@ for coltura in dict_reference_coltura.keys():
 # ------------------- 
 #      Culture
 # --------------------
-Ex_write.add_all_coltura_irrigate(dict_coltura[consortia],list(dict_reference_coltura.keys()))
+# order the dict_coltura 
+dict_coltura = dict_coltura[consortia]
+list_new_reference_type_crop = list(dict_reference_coltura.keys())
+list_type_crop = dict_Fabbisogni_50.keys()
+
+dict_consortia_coltura = order_dict_coltura(dict_coltura,
+                                            list_new_reference_type_crop, 
+                                            list_type_crop)
+
+Ex_write.add_all_coltura_irrigate(dict_consortia_coltura,list_new_reference_type_crop)
 
 # ------------------- 
 #    Permeability
@@ -226,6 +243,12 @@ Ex_write.workbook.save(Ex_write.output_name)
 print('************************')
 print('End programm')
 print(" %s seconds " % (time.time() - start_time))
+
+
+print('************************')
+print(' As in information if you are questionning about the crop you have decided to negligated and reference then into : list_non_desired_crop, in coltura.reference.py, you can stil look at the value of the superficie covered by each crop.')
+print('This information is store in dict_coltura ( key = crop, value = superficie irrigate), you can print it by taping :')
+print('print(dict_coltura)')
 
 
 

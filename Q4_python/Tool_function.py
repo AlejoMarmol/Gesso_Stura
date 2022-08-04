@@ -121,12 +121,43 @@ def is_area_valid(layer, max_area) :
  
     
     
+def order_dict_coltura(dict_coltura,list_new_reference_crop, list_type_crop):
+    """
+    order the coltura store in dict_coltura in fonction of the list_reference_crop
+    this part helps to order in quant 4 the writing of crops
+    
+    Parameters :
+    ---------------
+    dict_coltura : dcitionary
+        key : coltura
+        sub_key : value of superfici irrigate 
+        
+    list_new_reference_crop : list
+        ist which contains all the crops aren't associated with mais, prato, rizo, frutteto
+
+    list_type_crop : list
+        list of type crop in frutteto-mais-rizo-prato which are in the consortia
+        
+    Return :
+    ---------------
+    dict_order : dictionary
+         dictionary where the key are order first based on list_new_reference_crop 
+         then on list_type_crop
+    """
+    # create the dict
+    dict_order = {}
+    
+    # order with the list_new_reference_crop
+    for crop in list_new_reference_crop:
+        dict_order[crop] = dict_coltura[crop]
+    
+    # order by list_type_crop
+    for crop in list_type_crop:
+        dict_order[crop] = dict_coltura[crop]
     
     
     
-    
-    
-    
+    return dict_order
     
     
     

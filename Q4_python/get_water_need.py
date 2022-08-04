@@ -245,7 +245,7 @@ def get_single_crop_needs(type_crop, centroids_output, medi, wn):
         name = "sup20"
     
     # considers all the irrigation month which are possible 
-    for month in ['apr', 'mag', 'lug', 'giu', 'ago', 'set']: 
+    for month in ['apr', 'mag', 'giu', 'lug', 'ago', 'set']: 
         
         # if month is in dict_month_crop it means that the crops need to be 
         # irrigated this month 

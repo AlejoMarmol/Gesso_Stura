@@ -61,11 +61,15 @@ raster_folder = "C://Users/clemo/Documents/Italie/Studio PD/QGIS/info/Georeferen
 #             Excel file
 # ---------------------------------
 name = "C:/Users/clemo/Documents/Italie/Studio PD/QGIS/Quant4/quant4_vers_4_2_xls_ORIGINALE.xls" #"""  write """
+name_output = result_folder + "quant4_vers_4_2_"+ consortia_name_file
 Inizio = '01/04'                                                                                 #"""  write """
 Terminea = '30/09'                                                                               #"""  write """
+numero_consortia = 6.064                                                                               #"""  write """
+
 Ex_write = Excel_write(name,  
+                       name_output,
                        str(list_consortia[0]),
-                       6.064,
+                       numero_consortia,
                        Inizio,
                        Terminea)
 

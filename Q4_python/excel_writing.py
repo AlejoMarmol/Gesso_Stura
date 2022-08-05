@@ -189,14 +189,13 @@ def copy(workbook):
             
 class Excel_write():
     # ==========================================================================
-    def __init__(self, name, Denominaz, numero_consorziati,Inizio,Terminea):
+    def __init__(self, name, name_output, Denominaz, numero_consorziati,Inizio,Terminea):
         # ----------------------
         # Create the excel file
         self.name = name
         
         # output file
-        index = self.name.find('ORIGINALE')
-        self.output_name = self.name[:index] + Denominaz + self.name[index+9:]
+        self.output_name = name_output
         
         #workbook and sheet
         wb = xlrd.open_workbook(self.name)
